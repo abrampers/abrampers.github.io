@@ -1489,11 +1489,6 @@ body {
 	.image-cropper {
 		margin: auto;
 		margin-bottom: 2em;
-		width: 400px;
-		height: 400px;
-		position: relative;
-		overflow: hidden;
-		border-radius: 50%;
 	}
 
 	h1, h2, h3, h4, h5, h6 {
