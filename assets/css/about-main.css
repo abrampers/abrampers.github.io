@@ -1459,6 +1459,13 @@ body {
 
 		}
 
+		@media screen and (max-width: 600px) {
+			#profile-picture {
+				height: 200px;
+				width: 200px;
+			}
+		}
+
 	a {
 		-moz-transition: color 0.2s ease, border-bottom-color 0.2s ease;
 		-webkit-transition: color 0.2s ease, border-bottom-color 0.2s ease;
