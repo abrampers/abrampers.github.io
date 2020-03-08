@@ -22,76 +22,76 @@ body {
     text-align: left;
 }
 
-header .header-layout {
-    margin-top: 10px;
-    margin-bottom: 15px;
-    display: inline-block;
-}
+/* header .header-layout { */
+/*     margin-top: 10px; */
+/*     margin-bottom: 15px; */
+/*     display: inline-block; */
+/* } */
+/*  */
+/*  */
+/* header li { */
+/*     display: inline-block; */
+/* } */
+/*  */
+/* header ul { */
+/*     list-style: none; */
+/*     margin-top: auto; */
+/* } */
+/*  */
+/* header a { */
+/*     text-decoration: none; */
+/*     padding: 10px; */
+/* } */
+/*  */
+/* header .header-title { */
+/*     visibility: visible; */
+/*     margin: 5px; */
+/*     font-size: 25px; */
+/*     font-weight: bold; */
+/*     text-decoration: underline; */
+/*     text-underline-position: under; */
+/* } */
+/*  */
+/* header .header-section { */
+/*     margin: 5px; */
+/*     padding-top: 10px; */
+/*     padding-bottom: 2px; */
+/*     font-size: 20px; */
+/*      */
+/* } */
 
+/* @media(min-width: 26em) { */
+/*     header { */
+/*         padding: 15px; */
+/*     } */
+/*      */
+/*     header .header-layout { */
+/*         display: flex; */
+/*         justify-content: space-between; */
+/*         flex-wrap: wrap; */
+/*     } */
+/*      */
+/*     header .header-section { */
+/*         display: flex; */
+/*         margin: 5px; */
+/*         padding-top: 0px; */
+/*         padding-bottom: 2px; */
+/*     } */
+/* } */
 
-header li {
-    display: inline-block;
-}
-
-header ul {
-    list-style: none;
-    margin-top: auto;
-}
-
-header a {
-    text-decoration: none;
-    padding: 10px;
-}
-
-header .header-title {
-    visibility: visible;
-    margin: 5px;
-    font-size: 25px;
-    font-weight: bold;
-    text-decoration: underline;
-    text-underline-position: under;
-}
-
-header .header-section {
-    margin: 5px;
-    padding-top: 10px;
-    padding-bottom: 2px;
-    font-size: 20px;
-    
-}
-
-@media(min-width: 26em) {
-    header {
-        padding: 15px;
-    }
-    
-    header .header-layout {
-        display: flex;
-        justify-content: space-between;
-        flex-wrap: wrap;
-    }
-    
-    header .header-section {
-        display: flex;
-        margin: 5px;
-        padding-top: 0px;
-        padding-bottom: 2px;
-    }
-}
-
-nav {
-    margin-top: 20px;
-}
-
-nav li {
-    display: inline-block;
-    margin: 0 7px;
-    line-height: 1.5em;
-}
-
-nav li a.selected {
-    text-decoration: underline;
-}
+/* nav { */
+/*     margin-top: 20px; */
+/* } */
+/*  */
+/* nav li { */
+/*     display: inline-block; */
+/*     margin: 0 7px; */
+/*     line-height: 1.5em; */
+/* } */
+/*  */
+/* nav li a.selected { */
+/*     text-decoration: underline; */
+/* } */
 
 h1 {
     margin-bottom: 20px;
@@ -102,12 +102,95 @@ h2 {
     margin: 20px 0;
 }
 
+h3 {
+    margin: 10px 0;
+}
+
 p {
     margin-bottom: 10px;
 }
 
 a {
     color: inherit;
+}
+
+hr {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+/* Header */
+
+header {
+	position: relative;
+	background: linear-gradient(to bottom right, #ff644e, #cb3018);
+	color: #eee;
+	line-height: 1.5em;
+	padding: 0 20px;
+}
+
+header .wrapper {
+	padding: 25px 0 20px 0;
+}
+
+header a {
+	display: inline-block;
+}
+
+header p a {
+	text-decoration: underline;
+}
+
+header .logo {
+	width: 500px;
+	max-width: 80%;
+	margin-bottom: 6px;
+}
+
+header nav {
+	display: inline-block;
+	background-color: #fff;
+	border-radius: 10px;
+	margin-top: 18px;
+	overflow: hidden;
+}
+
+header nav li {
+	display: inline-block;
+}
+
+header nav a {
+	display: block;
+	color: #cb3018;
+	padding: 0 10px;
+	line-height: 30px;
+}
+
+header nav a:hover,
+header nav li.selected a {
+	color: #fff;
+	background-color: #cb3018;
+}
+
+@media(max-width: 655px) {
+	header nav {
+		padding-top: 2px;
+	}
+	header nav li a {
+		padding: 0;
+		margin: 0 10px;
+		border-bottom: 2px solid transparent;
+	}
+	header nav li a:hover,
+	header nav li.selected a {
+		background-color: inherit;
+		border-bottom: 2px solid #cb3018;
+		color: #cb3018;
+	}
+	header nav li.search.selected a,
+	header nav li.search a:hover {
+		background-image: url(/images/search.svg);
+	}
 }
 
 .description {
@@ -192,6 +275,30 @@ a {
     text-align: left;
     min-height: 100%;
     line-height: 1.6;
+}
+
+.content ul {
+	list-style-type: disc;
+	margin-top: 10px;
+	padding-left: 20px;
+}
+
+.content>ul {
+	font-size: 1.05em;
+	line-height: 1.5em;
+}
+
+.content ul li {
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.content ul ul {
+	margin-top: 0;
+}
+
+.content ul.compact li {
+	margin-top: 5px;
 }
 
 .browse-all {
