@@ -6,17 +6,6 @@
 
 /* Fonts */
 
-/* @font-face {
-	font-family: "Main";
-	src: url(/fonts/AirbnbCereal-Light.ttf);
-}
-
-@font-face {
-	font-family: "Main";
-	src: url(/fonts/AirbnbCereal-Bold.ttf);
-	font-weight: bold;
-} */
-
 @font-face {
 	font-family: "Main";
 	src: url(/fonts/SF-Pro-Display-Light.otf);
@@ -172,8 +161,22 @@ hr {
     margin-bottom: 0;
 }
 
+.item-list .metadata {
+	margin: 0;
+}
+
+.item-list .metadata.date-only {
+	margin-bottom: 10px;
+}
+
+.item-list .date {
+    color: #b8b8b8;
+}
+
 .tag-list {
+    display: inline-block;
     margin-bottom: 15px;
+    margin-right: 5px;
 }
 
 .tag-list li,
@@ -250,6 +253,10 @@ hr {
     text-align: center;
 }
 
+.content .date {
+	color: #555;
+}
+
 .browse-all {
     display: block;
     margin-bottom: 30px;
@@ -285,6 +292,14 @@ footer div a {
     header .site-name {
         color: #fff;
     }
+
+    .content .date {
+        color: #8a8a8a;
+    }
+
+    .item-list .date {
+		color: #7d7d7d;
+	}
 
     .item-list > li {
         background-color: #333;
