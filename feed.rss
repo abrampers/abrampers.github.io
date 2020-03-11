@@ -1,4 +1,183 @@
-<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content"><channel><title>Abram Situmorang</title><description>Here's a bit of my presence on the internet.</description><link>https://abram.id</link><language>en</language><lastBuildDate>Sun, 8 Mar 2020 22:46:36 +0700</lastBuildDate><pubDate>Sun, 8 Mar 2020 22:46:36 +0700</pubDate><ttl>250</ttl><atom:link href="https://abram.id/feed.rss" rel="self" type="application/rss+xml"/><item><guid isPermaLink="true">https://abram.id/blog/2020/3/8-WWDC</guid><title>WWDC19 🤖: Best Dub-Dub ever!</title><description>This year, I’m very lucky to be one of the WWDC19 Scholarship Winner from Indonesia to attend Apple’s event of the year. It’s obviously the best Dub-Dub ever since it’s my first time here! Dub-Dub 19 is an event packed with awesome things and I’m going to tell my story from the complete beginning. Here we go!</description><link>https://abram.id/blog/2020/3/8-WWDC</link><pubDate>Sun, 8 Mar 2020 17:31:00 +0700</pubDate><content:encoded><![CDATA[<h1>WWDC19 🤖: Best Dub-Dub ever!</h1><p>This year, I’m very lucky to be one of the WWDC19 Scholarship Winner from Indonesia to attend Apple’s event of the year. It’s obviously the best Dub-Dub ever since it’s my first time here! Dub-Dub 19 is an event packed with awesome things and I’m going to tell my story from the complete beginning. Here we go!</p><figure>
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content"><channel><title>Abram Situmorang</title><description>Here's a bit of my presence on the internet.</description><link>https://abram.id</link><language>en</language><lastBuildDate>Wed, 11 Mar 2020 23:46:34 +0700</lastBuildDate><pubDate>Wed, 11 Mar 2020 23:46:34 +0700</pubDate><ttl>250</ttl><atom:link href="https://abram.id/feed.rss" rel="self" type="application/rss+xml"/><item><guid isPermaLink="true">https://abram.id/blog/2020/3/12-HTTP2-Packet-Interception</guid><title>Intercepting HTTP/2 Packets without Wireshark</title><description>At this time of writing, I haven't found any way to intercept and decode HTTP/2 packet other than [Wireshark](https://www.wireshark.org). Wireshark is obviously a great tool for network analysis, but at other times, we want to intercept and process the packet built in right onto our applications. Wireshark isn't great for this use case, so we need to integrate HTTP/2 into existing packet interception library.</description><link>https://abram.id/blog/2020/3/12-HTTP2-Packet-Interception</link><pubDate>Thu, 12 Mar 2020 17:31:00 +0700</pubDate><content:encoded><![CDATA[<h1>Intercepting HTTP/2 Packets without Wireshark</h1><h2>HTTP/2, what is it?</h2><p>I never knew HTTP/2 until I bumped into gRPC when it uses HTTP/2 as it's Layer 7 protocol. At first, it seems that HTTP/2 is just like another update of the widely used HTTP/1.1, but HTTP/2 is a new HTTP protocol designed to deal with the limitations of HTTP/1.1.</p><p>For a bit of context, HTTP/1.1 had plenty of latency and inefficiency issues that made the performance of common internet webpage (who relies heavily on HTTP protocols) extremely hard to optimize. Imagine the first time we open a web page, it might need to request a few dozen resources from stylesheets, images, JavaScript codes, and other API calls. HTTP/1.1 does this by creating an equal number of TCP connection to get the resources in a parallel fashion. This means when the server is processing and preparing the response, the TCP connection is doing nothing but waiting the server to give the response. This is very inefficient considering every single TCP connection made is doing nothing for some time. Plus there is always a cost when opening a TCP connection and closing it. So it is very inefficient to use one TCP connection per HTTP request.</p><p>HTTP/2 came to solve some of the problem by enabling TCP to be multiplexed for multiple HTTP requests. So with HTTP/2 we will be opening less number of TCP connection compared with HTTP/1.1. HTTP/2 also enables a TCP connection to be reused for multiple request, no more one TCP connection per HTTP request. These two features will improve the utilization of the TCP connection.</p><p>Other main difference of HTTP/2 and HTTP/1.1 is that HTTP/2 is binary vs HTTP/1.1 who is textual. This gave us the benefit of speed since computers are good with binaries, but on the other side more difficult to debug (since humans are not very good with binaries). And the extra thing is even the HTTP/2 headers are compressed for performance reasons. These two features increase the complexity to intercept and process HTTP/2 packets from the previous HTTP/1.1 where we could just read the whole payload text.</p><p>Aside from features mentioned above, there are plenty other features of HTTP/2 you can read in the <a href="https://httpwg.org/specs/rfc7540.html">RFC 7540</a> document.</p><h2>Intercepting the actual packets</h2><p>At this time of writing, I haven't found any way to intercept and decode HTTP/2 packet other than <a href="https://www.wireshark.org">Wireshark</a>. Wireshark is obviously a great tool for network analysis, but at other times, we want to intercept and process the packet built in right onto our applications. Wireshark isn't great for this use case, so we need to integrate HTTP/2 into existing packet interception library.</p><p>To intercept the packets, I will be using Go with Google's <a href="https://github.com/google/gopacket">Gopacket</a>. This stack is my go to choice because Go have the first class support for HTTP and HTTP2 and Gopacket itself is fairly extensible.</p><p>From now on we'll use the term frame to represent the unit of transfer of an HTTP/2 traffic.</p><h3>Implementing the layers</h3><p>Since Gopacket doesn't support HTTP/2 as it's application layer, we need to tell Gopacket how is the structure HTTP/2 frame using the code below.</p><pre data-language="go"><code><span class="hljs-comment">// Create a layer type and give it a name and a decoder to use.</span>
+<span class="hljs-keyword">var</span> LayerTypeHTTP2 = gopacket.RegisterLayerType(<span class="hljs-number">12345</span>, gopacket.LayerTypeMetadata{Name: <span class="hljs-string">"HTTP2"</span>, Decoder: gopacket.DecodeFunc(decodeHTTP2)})
+
+<span class="hljs-keyword">type</span> HTTP2 <span class="hljs-keyword">struct</span> {
+    layers.BaseLayer
+
+    frame http2.Frame
+}
+
+<span class="hljs-comment">// Implement the layer's metadata</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(h HTTP2)</span> <span class="hljs-title">LayerType</span><span class="hljs-params">()</span> <span class="hljs-title">gopacket</span>.<span class="hljs-title">LayerType</span></span>      { <span class="hljs-keyword">return</span> LayerTypeHTTP2 }
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(h *HTTP2)</span> <span class="hljs-title">Payload</span><span class="hljs-params">()</span> []<span class="hljs-title">byte</span></span>                   { <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span> }
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(h *HTTP2)</span> <span class="hljs-title">CanDecode</span><span class="hljs-params">()</span> <span class="hljs-title">gopacket</span>.<span class="hljs-title">LayerClass</span></span>    { <span class="hljs-keyword">return</span> LayerTypeHTTP2 }
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(h *HTTP2)</span> <span class="hljs-title">NextLayerType</span><span class="hljs-params">()</span> <span class="hljs-title">gopacket</span>.<span class="hljs-title">LayerType</span></span> { <span class="hljs-keyword">return</span> gopacket.LayerTypeZero }
+
+<span class="hljs-comment">// Implement the decoder function to be used</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">decodeHTTP2</span><span class="hljs-params">(data []<span class="hljs-keyword">byte</span>, p gopacket.PacketBuilder)</span> <span class="hljs-title">error</span></span> {
+    h := &amp;HTTP2{}
+    err := h.DecodeFromBytes(data, p)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+    p.AddLayer(h)
+    p.SetApplicationLayer(h)
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+}
+
+<span class="hljs-comment">// 1</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(h *HTTP2)</span> <span class="hljs-title">DecodeFromBytes</span><span class="hljs-params">(data []<span class="hljs-keyword">byte</span>, df gopacket.DecodeFeedback)</span> <span class="hljs-title">error</span></span> {
+    err := validateHTTP2(data)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+
+    <span class="hljs-keyword">var</span> framerOutput bytes.Buffer
+    r := bytes.NewReader(data)
+    framer := http2.NewFramer(&amp;framerOutput, r)
+
+    h.BaseLayer = layers.BaseLayer{Contents: data[:<span class="hljs-built_in">len</span>(data)]}
+
+    frame, err := framer.ReadFrame()
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        <span class="hljs-keyword">return</span> err
+    }
+    h.frame = frame
+
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+}
+
+<span class="hljs-comment">// 2</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">validateHTTP2</span><span class="hljs-params">(payload []<span class="hljs-keyword">byte</span>)</span> <span class="hljs-title">error</span></span> {
+    frameHeaderLength := <span class="hljs-keyword">uint32</span>(<span class="hljs-number">9</span>)
+    payloadLength := <span class="hljs-built_in">len</span>(payload)
+
+    payloadIdx := <span class="hljs-number">0</span>
+    <span class="hljs-keyword">for</span> payloadIdx &lt; payloadLength {
+        <span class="hljs-keyword">if</span> payloadIdx+<span class="hljs-keyword">int</span>(frameHeaderLength) &gt; payloadLength {
+            <span class="hljs-keyword">return</span> fmt.Errorf(<span class="hljs-string">"packet length is not equal with the packet length mentioned in frame header"</span>)
+        }
+
+        frameLength := (<span class="hljs-keyword">uint32</span>(payload[payloadIdx+<span class="hljs-number">0</span>])&lt;&lt;<span class="hljs-number">16</span> | <span class="hljs-keyword">uint32</span>(payload[payloadIdx+<span class="hljs-number">1</span>])&lt;&lt;<span class="hljs-number">8</span> | <span class="hljs-keyword">uint32</span>(payload[payloadIdx+<span class="hljs-number">2</span>]))
+        rBit := payload[payloadIdx+<span class="hljs-number">5</span>] &gt;&gt; <span class="hljs-number">7</span>
+
+        <span class="hljs-keyword">if</span> rBit != <span class="hljs-number">0</span> {
+            <span class="hljs-keyword">return</span> fmt.Errorf(<span class="hljs-string">"R bit is not unset"</span>)
+        }
+
+        payloadIdx += <span class="hljs-keyword">int</span>(frameLength + frameHeaderLength)
+    }
+
+    <span class="hljs-keyword">if</span> payloadIdx != payloadLength {
+        <span class="hljs-keyword">return</span> fmt.Errorf(<span class="hljs-string">"packet length is not equal with the packet length mentioned in frame header"</span>)
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+}
+</code></pre><h4>1. <code>DecodeFromBytes(data []byte, df gopacket.DecodeFeedback)</code></h4><p>This is where we want to utilize Go's <code>net/http2</code> package to decode the frame for us. First, we create a new <code>framer</code> and pass it our data. Next we call the <code>ReadFrame</code> function to get the actual HTTP/2 frame.</p><h4>2. validateHTTP2(payload []byte)</h4><pre><code class="language-no-highlight">+-----------------------------------------------+
+|                 Length (24)                   |
++---------------+---------------+---------------+
+|   Type (8)    |   Flags (8)   |
++-+-------------+---------------+-------------------------------+
+|R|                 Stream Identifier (31)                      |
++=+=============================================================+
+|                   Frame Payload (0...)                      ...
++---------------------------------------------------------------+
+</code></pre><p>After many trials, I found out that <code>http2.Framer</code> would stuck if we give data that's not a valid HTTP/2 frame. This means we need to find a way to classify whether the bytes of data is a valid frame or not. <a href="https://httpwg.org/specs/rfc7540.html">RFC 7540</a> document doesn't mention any way to classify a HTTP/2 frame, so I came up with a currently working solution by checking:</p><ul><li>Does the frame length specified in the frame header is the same with the actual payload length?</li><li>Does the R bit is unset?</li></ul><h3>Implementing the layers</h3><p>Next, we're going to capture the packet and decode the HTTP/2 frames.</p><pre data-language="go"><code><span class="hljs-keyword">package</span> main
+
+<span class="hljs-keyword">import</span> (
+    <span class="hljs-string">"bytes"</span>
+    <span class="hljs-string">"fmt"</span>
+    <span class="hljs-string">"log"</span>
+    <span class="hljs-string">"time"</span>
+
+    <span class="hljs-string">"github.com/google/gopacket"</span>
+    <span class="hljs-string">"github.com/google/gopacket/layers"</span>
+    <span class="hljs-string">"github.com/google/gopacket/pcap"</span>
+
+    <span class="hljs-string">"golang.org/x/net/http2"</span>
+)
+
+<span class="hljs-keyword">var</span> (
+    device       <span class="hljs-keyword">string</span>        = <span class="hljs-string">"lo0"</span>
+    snapshot_len <span class="hljs-keyword">int32</span>         = <span class="hljs-number">1024</span>
+    promiscuous  <span class="hljs-keyword">bool</span>          = <span class="hljs-literal">false</span>
+    timeout      time.Duration = <span class="hljs-number">900</span> * time.Millisecond
+    filter       <span class="hljs-keyword">string</span>        = <span class="hljs-string">"tcp"</span>
+)
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span> {
+    <span class="hljs-comment">// Open device: We could also use other options (i.e. Open a .pcap file)</span>
+    handle, err := pcap.OpenLive(device, snapshot_len, promiscuous, timeout)
+    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+        log.Fatal(err)
+    }
+    log.Printf(<span class="hljs-string">"Successfully opened live sniffing on %s\n"</span>, device)
+    <span class="hljs-keyword">defer</span> handle.Close()
+
+    <span class="hljs-keyword">var</span> h2c HTTP2
+    
+    <span class="hljs-comment">// Create a parser to decode our HTTP/2 frame</span>
+    parser := gopacket.NewDecodingLayerParser(LayerTypeHTTP2, &amp;h2c)
+
+    <span class="hljs-comment">// Use the handle as a packet source to process all packets</span>
+    source := gopacket.NewPacketSource(handle, handle.LinkType())
+    decoded := []gopacket.LayerType{}
+    
+    <span class="hljs-comment">// Process every packet</span>
+    <span class="hljs-keyword">for</span> packet := <span class="hljs-keyword">range</span> source.Packets() {
+        ipLayer := packet.NetworkLayer()
+        <span class="hljs-keyword">if</span> ipLayer == <span class="hljs-literal">nil</span> {
+            log.Println(<span class="hljs-string">"No IP"</span>)
+            <span class="hljs-keyword">continue</span>
+        }
+
+        <span class="hljs-comment">// Cast the layer to either IPv4 or IPv6</span>
+        ipv4, ipv4Ok := ipLayer.(*layers.IPv4)
+        ipv6, ipv6Ok := ipLayer.(*layers.IPv6)
+        <span class="hljs-keyword">if</span> !ipv4Ok &amp;&amp; !ipv6Ok {
+            log.Println(<span class="hljs-string">"Failed to cast packet to IPv4 or IPv6"</span>)
+            <span class="hljs-keyword">continue</span>
+        }
+
+        tcpLayer := packet.Layer(layers.LayerTypeTCP)
+        <span class="hljs-keyword">if</span> tcpLayer == <span class="hljs-literal">nil</span> {
+            log.Println(<span class="hljs-string">"Not a TCP Packet"</span>)
+            <span class="hljs-keyword">continue</span>
+        }
+
+        tcp, ok := tcpLayer.(*layers.TCP)
+        <span class="hljs-keyword">if</span> !ok {
+            log.Println(<span class="hljs-string">"Failed to cast packet to TCP"</span>)
+            <span class="hljs-keyword">continue</span>
+        }
+
+        appLayer := packet.ApplicationLayer()
+        <span class="hljs-keyword">if</span> appLayer == <span class="hljs-literal">nil</span> {
+            log.Println(<span class="hljs-string">"No ApplicationLayer payload"</span>)
+            <span class="hljs-keyword">continue</span>
+        }
+
+        packetData := appLayer.Payload()
+        <span class="hljs-keyword">if</span> err := parser.DecodeLayers(packetData, &amp;decoded); err != <span class="hljs-literal">nil</span> {
+            fmt.Printf(<span class="hljs-string">"Could not decode layers: %v\n"</span>, err)
+            <span class="hljs-keyword">continue</span>
+        }
+
+        fmt.Println(<span class="hljs-string">"*****************************************************"</span>)
+        <span class="hljs-keyword">if</span> ipv4Ok {
+            fmt.Println(<span class="hljs-string">"IPv4 SrcIP:        "</span>, ipv4.SrcIP)
+            fmt.Println(<span class="hljs-string">"IPv4 DstIP:        "</span>, ipv4.DstIP)
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> ipv6Ok {
+            fmt.Println(<span class="hljs-string">"IPv6 SrcIP:        "</span>, ipv6.SrcIP)
+            fmt.Println(<span class="hljs-string">"IPv6 DstIP:        "</span>, ipv6.DstIP)
+        }
+        fmt.Println(<span class="hljs-string">"TCP srcPort:       "</span>, tcp.SrcPort)
+        fmt.Println(<span class="hljs-string">"TCP dstPort:       "</span>, tcp.DstPort)
+        fmt.Println(<span class="hljs-string">"HTTP/2:            "</span>, h2c.frame)
+        fmt.Println(<span class="hljs-string">"*****************************************************"</span>)
+    }
+}
+</code></pre><h2>Conclusion</h2><p>Using Go's native HTTP support and Gopacket, we could build a packet interception program for HTTP/2. For further HTTP/2 header processing, we could also use <code>net/http2/hpack</code> package to do the HPACK decoding and decoding.</p>]]></content:encoded></item><item><guid isPermaLink="true">https://abram.id/blog/2020/3/8-WWDC</guid><title>WWDC19 🤖: Best Dub-Dub ever!</title><description>This year, I’m very lucky to be one of the WWDC19 Scholarship Winner from Indonesia to attend Apple’s event of the year. It’s obviously the best Dub-Dub ever since it’s my first time here! Dub-Dub 19 is an event packed with awesome things and I’m going to tell my story from the complete beginning. Here we go!</description><link>https://abram.id/blog/2020/3/8-WWDC</link><pubDate>Sun, 8 Mar 2020 17:31:00 +0700</pubDate><content:encoded><![CDATA[<h1>WWDC19 🤖: Best Dub-Dub ever!</h1><p>This year, I’m very lucky to be one of the WWDC19 Scholarship Winner from Indonesia to attend Apple’s event of the year. It’s obviously the best Dub-Dub ever since it’s my first time here! Dub-Dub 19 is an event packed with awesome things and I’m going to tell my story from the complete beginning. Here we go!</p><figure>
     <img src= "https://cdn-images-1.medium.com/max/6048/1*mMUmHriJt0p8Y2Z46gBZGw.jpeg" alt="HMIF ITB @ WWDC19 (Nicho, Abram, and Faza)" style="width: 75%;" />
     <figcaption>HMIF ITB @ WWDC19 (Nicho, Abram, and Faza)</figcaption>
 </figure><h2><strong>What is WWDC?</strong></h2><blockquote><p>The Apple Worldwide Developers Conference (WWDC, also known as Dub Dub) is a conference held annually by Apple Inc. in San Jose, California. Apple uses the event to showcase its new software and technologies for software developers. Attendees can participate in hands-on labs with Apple engineers and attend in-depth sessions covering a wide variety of topics. — Wikipedia</p></blockquote><p>Enough from Wikipedia, for me, WWDC is an event where developers gather and obtain plenty of insights from Apple about their software. Even better, it’s an event where students (or recently graduated High School students) can apply and actually receive the scholarship to go to this event without spending a single penny.</p><h2>WWDC Scholarship?</h2><p>The <strong>scholarship </strong>term here means that Apple will get you the WWDC ticket for <strong>free</strong>. I repeat, <strong>for free</strong>.</p><p>To submit, we have to create a Swift Playground that can be experienced in 3 minutes in iPad’s Swift Playgrounds or Xcode’s Playground. After submission, application will be judged based on:</p><ul><li>Technical accomplishment</li></ul><ul><li>Creativity of ideas</li></ul><ul><li>Content of written response</li></ul><h3>Application</h3><p>On a beautiful morning on Thursday, March 15, 2019 Apple announced that they had opened WWDC Scholarship Submission and that all submissions are meant to be submitted before Sunday, March 24, 2019 at 5.00 PM PDT. Wow, 7 days to work on the submission? <strong>Challenge accepted</strong>! I was quite surprised because they only gave us 7 days to work on the submission while previously the submission was up to two weeks long.</p><p>At first, I had an idea to create a real-time style transfer application in Swift Playground using UIKit, CoreML and probably camera for the real-time transfer, but after 5 days of working on it, the CoreML model decided to not cooperate. It always gave an error without any description. Frustrating.</p><p>This problem forced me to find something outstanding that works and was good enough to distinct me from other applicants. And some <em>Metal </em>struck my mind. “Why don’t I try to use <a href="https://developer.apple.com/metal/">*Metal</a> *just like how I used OpenGL for my Computer Graphics assignment?” And after 2 sleepless nights, I did just that.</p><p>I’ve created a simple introduction to <em>Metal </em>using MetalKitnamed <strong>Metalify</strong>. Here's the <a href="https://github.com/abrampers/WWDC19-Submission">playground</a> if you'd like to try it on your own.</p><figure>

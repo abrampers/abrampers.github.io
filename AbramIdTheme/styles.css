@@ -8,13 +8,18 @@
 
 @font-face {
 	font-family: "Main";
-	src: url(/fonts/SF-Pro-Display-Light.otf);
+	src: url(/fonts/SourceSansPro-Regular.ttf);
 }
 
 @font-face {
 	font-family: "Main";
-	src: url(/fonts/SF-Pro-Display-Bold.otf);
+	src: url(/fonts/SourceSansPro-Bold.ttf);
 	font-weight: bold;
+}
+
+@font-face {
+	font-family: "Code";
+	src: url(/fonts/SourceCodePro-Regular.ttf);
 }
 
 body {
@@ -32,6 +37,11 @@ body {
     margin-right: auto;
     padding: 30px 40px 0 40px;
     text-align: left;
+}
+
+.page {
+	font-size: 1.05em;
+	text-align: left;
 }
 
 header {
@@ -56,7 +66,7 @@ header p a {
 }
 
 header .site-name {
-    font-size: 1.5em;
+    font-size: 2.5em;
     color: #fff;
     font-weight: bold;
 }
@@ -198,8 +208,20 @@ hr {
     display: inline-block;
 }
 
+/* Content */
+
 .content {
     margin-bottom: 40px;
+}
+
+content a,
+.content a code {
+	text-decoration: underline;
+}
+
+.content h2 a,
+.content h2 a code {
+	text-decoration: none;
 }
 
 .content ul {
@@ -262,6 +284,16 @@ hr {
     margin-bottom: 30px;
 }
 
+.content img {
+	display: block;
+	max-width: 100%;
+	margin: 20px auto 0 auto;
+}
+
+.content img.compact {
+	display: inline-block;
+}
+
 .all-tags li {
     font-size: 1.4em;
     margin-right: 10px;
@@ -283,6 +315,160 @@ footer div a {
     text-decoration: none;
 }
 
+pre {
+	margin-top: 20px;
+}
+
+pre code {
+	display: block;
+	background-color: #1a1a1a;
+	padding: 15px 20px;
+	border-radius: 12px;
+	color: #a9bcbc;
+	line-height: 1.4em;
+	font-size: 0.95em;
+	overflow-x: auto;
+	white-space: pre;
+	-webkit-overflow-scrolling: touch;
+}
+
+/* Highlight.js Theme */
+/*
+  IR_Black style (c) Vasily Mikhailitchenko <vaskas@programica.ru>
+*/
+
+.hljs {
+    display: block;
+    overflow-x: auto;
+    padding: 0.5em;
+    background: #000;
+    color: #f8f8f8;
+  }
+  
+  .hljs-comment,
+  .hljs-quote,
+  .hljs-meta {
+    color: #7c7c7c;
+  }
+  
+  .hljs-keyword,
+  .hljs-selector-tag,
+  .hljs-tag,
+  .hljs-name {
+    color: #96cbfe;
+  }
+  
+  .hljs-attribute,
+  .hljs-selector-id {
+    color: #ffffb6;
+  }
+  
+  .hljs-string,
+  .hljs-selector-attr,
+  .hljs-selector-pseudo,
+  .hljs-addition {
+    color: #a8ff60;
+  }
+  
+  .hljs-subst {
+    color: #daefa3;
+  }
+  
+  .hljs-regexp,
+  .hljs-link {
+    color: #e9c062;
+  }
+  
+  .hljs-title,
+  .hljs-section,
+  .hljs-type,
+  .hljs-doctag {
+    color: #ffffb6;
+  }
+  
+  .hljs-symbol,
+  .hljs-bullet,
+  .hljs-variable,
+  .hljs-template-variable,
+  .hljs-literal {
+    color: #c6c5fe;
+  }
+  
+  .hljs-number,
+  .hljs-deletion {
+    color:#ff73fd;
+  }
+  
+  .hljs-emphasis {
+    font-style: italic;
+  }
+  
+  .hljs-strong {
+    font-weight: bold;
+  }
+
+/* Articles */
+
+article h1 {
+	font-size: 2.5em;
+	margin-bottom: 15px;
+	line-height: 1.2em;
+	max-width: 95%;
+}
+
+article h1.smaller {
+	font-size: 2.3em;
+}
+
+article h2 {
+	font-size: 1.5em;
+	margin: 25px 0 20px 0;
+}
+
+article h3 {
+	font-size: 1.2em;
+	margin-top: 20px;
+}
+
+article .metadata {
+	margin-bottom: 23px;
+}
+
+article .date {
+	color: #555;
+}
+
+article p {
+	margin-top: 20px;
+	font-size: 1.05em;
+	line-height: 1.5;
+}
+
+article .recommendation {
+	display: inline-block;
+	border-radius: 7px;
+	color: #fff;
+	padding: 7px 7px 7px 33px;
+	font-size: 0.9em;
+}
+
+article p code,
+article li code {
+	background-color: #e2e2e2;
+	display: inline-block;
+	padding: 0 5px;
+	border-radius: 8px;
+	font-size: 0.9em;
+	margin: 1px;
+}
+
+article p code.inline,
+article li code.inline {
+	display: inline;
+	background-color: inherit;
+	padding: 0;
+}
+
 @media (prefers-color-scheme: dark) {
     body {
         background-color: #222;
@@ -293,9 +479,18 @@ footer div a {
         color: #fff;
     }
 
-    .content .date {
+    article .date {
         color: #8a8a8a;
     }
+
+    article p code,
+	article li code {
+		background-color: #171717;
+	}
+	article p.info,
+	blockquote p {
+		background-color: #101010;
+	}
 
     .item-list .date {
 		color: #7d7d7d;
