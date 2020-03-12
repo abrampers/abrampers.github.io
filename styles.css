@@ -46,7 +46,8 @@ body {
 
 header {
 	position: relative;
-	background: linear-gradient(to bottom right, #4e8cff, #0730b6);
+    background: linear-gradient(to bottom right, #2e4571, #091936);
+/*	background: linear-gradient(to bottom right, #4e8cff, #0730b6);*/
 	color: #fff;
 	line-height: 1.5em;
 	padding: 0 20px;
@@ -92,7 +93,8 @@ header nav li {
 
 header nav a {
 	display: block;
-	color: #0730b6;
+    color: #091936;
+/*	color: #0730b6;*/
 	padding: 0 10px;
     line-height: 30px;
     text-decoration: none;
@@ -101,7 +103,8 @@ header nav a {
 header nav a:hover,
 header nav li.selected a {
 	color: #fff;
-	background-color: #0730b6;
+    background-color: #091936;
+/*	background-color: #0730b6;*/
 }
 
 header nav .search a {
@@ -147,7 +150,7 @@ hr {
 }
 
 .description {
-    margin-bottom: 10px;
+    margin-bottom: 0px;
 }
 
 .item-list > li {
@@ -428,6 +431,11 @@ article h2 {
 article h3 {
 	font-size: 1.2em;
 	margin-top: 20px;
+}
+
+article h4 {
+    font-size: 1.0em;
+    margin-top: 20px;
 }
 
 article .metadata {
