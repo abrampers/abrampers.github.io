@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content"><channel><title>Abram Situmorang</title><description>Here's a bit of my presence on the internet.</description><link>https://abram.id</link><language>en</language><lastBuildDate>Sun, 29 Mar 2020 15:14:04 +0700</lastBuildDate><pubDate>Sun, 29 Mar 2020 15:14:04 +0700</pubDate><ttl>250</ttl><atom:link href="https://abram.id/feed.rss" rel="self" type="application/rss+xml"/><item><guid isPermaLink="true">https://abram.id/blog/2020/3/12-HTTP2-Packet-Interception</guid><title>Intercepting HTTP/2 Packets without Wireshark</title><description>At this time of writing, I haven't found any way to intercept and decode HTTP/2 packet other than Wireshark. In this post, we'll make a HTTP/2 packet interceptor.</description><link>https://abram.id/blog/2020/3/12-HTTP2-Packet-Interception</link><pubDate>Thu, 12 Mar 2020 17:31:00 +0700</pubDate><content:encoded><![CDATA[<h1>Intercepting HTTP/2 Packets without Wireshark</h1><h2>HTTP/2, what is it?</h2><p>I never knew HTTP/2 until I bumped into gRPC, which uses HTTP/2 as its Layer 7 protocol. At first, it seems that HTTP/2 is just like another update of the commonly used HTTP/1.1. Yet HTTP/2 is a new HTTP protocol designed to deal with the limitations of HTTP/1.1.</p><p>For a bit of context, HTTP/1.1 had plenty of latency and inefficiency issues that made the performance of common internet webpage (that relies heavily on HTTP protocols) extremely hard to optimize. The first time we open a web page, it usually requires requesting a dozen resources from stylesheets, images, JavaScript codes, and other API calls. HTTP/1.1 does this by creating an equal number of TCP connection to get the resources in a parallel fashion. This means when the server is processing and preparing the response, the TCP connection is doing nothing but waiting for the server to give the response. This is very inefficient considering every single TCP connection made is doing nothing for some time. Plus there is always a cost when opening a TCP connection and closing it. So it is very inefficient to use one TCP connection per HTTP request.</p><p>HTTP/2 was made to solve some of the problems by enabling TCP to be multiplexed for multiple HTTP requests. So with HTTP/2, we will be opening less number of TCP connections compared to HTTP/1.1. HTTP/2 also enables a TCP connection to be reused for multiple request, no more one TCP connection per HTTP request. These two features will improve the utilization of the TCP connection.</p><p>Another main difference of HTTP/2 and HTTP/1.1 is that HTTP/2 is binary, while HTTP/1.1 is textual. On one hand, this gives us the benefit of speed since computers are good with binaries. Yet on the other hand, it is more difficult to debug since humans are not very good with binaries. To add on, what's more interesting is even the HTTP/2 headers are compressed for performance reasons. These two features increase the complexity to intercept and process HTTP/2 packets from the previous HTTP/1.1 where we could just read the whole payload text.</p><p>Aside from features mentioned above, there are plenty of other features of HTTP/2 you can read in the <a href="https://httpwg.org/specs/rfc7540.html">RFC 7540</a> document.</p><h2>Intercepting the actual packets</h2><p>At this time of writing, I haven't found any way to intercept and decode HTTP/2 packet other than <a href="https://www.wireshark.org">Wireshark</a>. Wireshark is obviously a great tool for network analysis, but at other times, we want to intercept and process the packet built in right onto our applications. In this use case, Wireshark is not a suitable option, so we need to integrate HTTP/2 into existing packet interception library.</p><p>To intercept the packets, I will be using Go with Google's <a href="https://github.com/google/gopacket">Gopacket</a>. This stack is my go to choice because Go have the first class support for HTTP and HTTP2 and Gopacket itself is fairly extensible.</p><p>From here onwards we'll use the term "frame" to represent the unit of transfer of an HTTP/2 traffic.</p><h3>Implementing the layers</h3><p>Since Gopacket doesn't support HTTP/2 as its application layer, we need to tell Gopacket about the structure of HTTP/2 frame using the code below.</p><pre data-language="go"><code><span class="hljs-comment">// Create a layer type and give it a name and a decoder to use.</span>
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content"><channel><title>Abram Situmorang</title><description>Here's a bit of my presence on the internet.</description><link>https://abram.id</link><language>en</language><lastBuildDate>Mon, 30 Mar 2020 10:40:07 +0700</lastBuildDate><pubDate>Mon, 30 Mar 2020 10:40:07 +0700</pubDate><ttl>250</ttl><atom:link href="https://abram.id/feed.rss" rel="self" type="application/rss+xml"/><item><guid isPermaLink="true">https://abram.id/blog/2020/3/12-HTTP2-Packet-Interception</guid><title>Intercepting HTTP/2 Packets without Wireshark</title><description>At this time of writing, I haven't found any way to intercept and decode HTTP/2 packet other than Wireshark. In this post, we'll make a HTTP/2 packet interceptor.</description><link>https://abram.id/blog/2020/3/12-HTTP2-Packet-Interception</link><pubDate>Thu, 12 Mar 2020 17:31:00 +0700</pubDate><content:encoded><![CDATA[<h1>Intercepting HTTP/2 Packets without Wireshark</h1><h2>HTTP/2, what is it?</h2><p>I never knew HTTP/2 until I bumped into gRPC, which uses HTTP/2 as its Layer 7 protocol. At first, it seems that HTTP/2 is just like another update of the commonly used HTTP/1.1. Yet HTTP/2 is a new HTTP protocol designed to deal with the limitations of HTTP/1.1.</p><p>For a bit of context, HTTP/1.1 had plenty of latency and inefficiency issues that made the performance of common internet webpage (that relies heavily on HTTP protocols) extremely hard to optimize. The first time we open a web page, it usually requires requesting a dozen resources from stylesheets, images, JavaScript codes, and other API calls. HTTP/1.1 does this by creating an equal number of TCP connection to get the resources in a parallel fashion. This means when the server is processing and preparing the response, the TCP connection is doing nothing but waiting for the server to give the response. This is very inefficient considering every single TCP connection made is doing nothing for some time. Plus there is always a cost when opening a TCP connection and closing it. So it is very inefficient to use one TCP connection per HTTP request.</p><p>HTTP/2 was made to solve some of the problems by enabling TCP to be multiplexed for multiple HTTP requests. So with HTTP/2, we will be opening less number of TCP connections compared to HTTP/1.1. HTTP/2 also enables a TCP connection to be reused for multiple request, no more one TCP connection per HTTP request. These two features will improve the utilization of the TCP connection.</p><p>Another main difference of HTTP/2 and HTTP/1.1 is that HTTP/2 is binary, while HTTP/1.1 is textual. On one hand, this gives us the benefit of speed since computers are good with binaries. Yet on the other hand, it is more difficult to debug since humans are not very good with binaries. To add on, what's more interesting is even the HTTP/2 headers are compressed for performance reasons. These two features increase the complexity to intercept and process HTTP/2 packets from the previous HTTP/1.1 where we could just read the whole payload text.</p><p>Aside from features mentioned above, there are plenty of other features of HTTP/2 you can read in the <a href="https://httpwg.org/specs/rfc7540.html">RFC 7540</a> document.</p><h2>Intercepting the actual packets</h2><p>At this time of writing, I haven't found any way to intercept and decode HTTP/2 packet other than <a href="https://www.wireshark.org">Wireshark</a>. Wireshark is obviously a great tool for network analysis, but at other times, we want to intercept and process the packet built in right onto our applications. In this use case, Wireshark is not a suitable option, so we need to integrate HTTP/2 into existing packet interception library.</p><p>To intercept the packets, I will be using Go with Google's <a href="https://github.com/google/gopacket">Gopacket</a>. This stack is my go to choice because Go have the first class support for HTTP and HTTP2 and Gopacket itself is fairly extensible.</p><p>From here onwards we'll use the term "frame" to represent the unit of transfer of an HTTP/2 traffic.</p><h3>Implementing the layers</h3><p>Since Gopacket doesn't support HTTP/2 as its application layer, we need to tell Gopacket about the structure of HTTP/2 frame using the code below.</p><pre data-language="go"><code><span class="hljs-comment">// Create a layer type and give it a name and a decoder to use.</span>
 <span class="hljs-keyword">var</span> LayerTypeHTTP2 = gopacket.RegisterLayerType(<span class="hljs-number">12345</span>, gopacket.LayerTypeMetadata{Name: <span class="hljs-string">"HTTP2"</span>, Decoder: gopacket.DecodeFunc(decodeHTTP2)})
 
 <span class="hljs-keyword">type</span> HTTP2 <span class="hljs-keyword">struct</span> {
     layers.BaseLayer
 
-    frame http2.Frame
+    frames []http2.Frame
 }
 
-<span class="hljs-comment">// Implement the layer's metadata</span>
+<span class="hljs-comment">// Implement layer's metadata</span>
 <span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(h HTTP2)</span> <span class="hljs-title">LayerType</span><span class="hljs-params">()</span> <span class="hljs-title">gopacket</span>.<span class="hljs-title">LayerType</span></span>      { <span class="hljs-keyword">return</span> LayerTypeHTTP2 }
 <span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(h *HTTP2)</span> <span class="hljs-title">Payload</span><span class="hljs-params">()</span> []<span class="hljs-title">byte</span></span>                   { <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span> }
 <span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(h *HTTP2)</span> <span class="hljs-title">CanDecode</span><span class="hljs-params">()</span> <span class="hljs-title">gopacket</span>.<span class="hljs-title">LayerClass</span></span>    { <span class="hljs-keyword">return</span> LayerTypeHTTP2 }
@@ -25,55 +25,56 @@
     <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
 }
 
-<span class="hljs-comment">// 1</span>
-<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(h *HTTP2)</span> <span class="hljs-title">DecodeFromBytes</span><span class="hljs-params">(data []<span class="hljs-keyword">byte</span>, df gopacket.DecodeFeedback)</span> <span class="hljs-title">error</span></span> {
-    err := validateHTTP2(data)
-    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
-        <span class="hljs-keyword">return</span> err
-    }
-
-    <span class="hljs-keyword">var</span> framerOutput bytes.Buffer
-    r := bytes.NewReader(data)
-    framer := http2.NewFramer(&amp;framerOutput, r)
-
-    h.BaseLayer = layers.BaseLayer{Contents: data[:<span class="hljs-built_in">len</span>(data)]}
-
-    frame, err := framer.ReadFrame()
-    <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
-        <span class="hljs-keyword">return</span> err
-    }
-    h.frame = frame
-
-    <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(h *HTTP2)</span> <span class="hljs-title">Frames</span><span class="hljs-params">()</span> []<span class="hljs-title">http2</span>.<span class="hljs-title">Frame</span></span> {
+    <span class="hljs-keyword">return</span> h.frames
 }
 
-<span class="hljs-comment">// 2</span>
-<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">validateHTTP2</span><span class="hljs-params">(payload []<span class="hljs-keyword">byte</span>)</span> <span class="hljs-title">error</span></span> {
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(h *HTTP2)</span> <span class="hljs-title">DecodeFromBytes</span><span class="hljs-params">(data []<span class="hljs-keyword">byte</span>, df gopacket.DecodeFeedback)</span> <span class="hljs-title">error</span></span> {
+    <span class="hljs-keyword">var</span> frames []http2.Frame
     frameHeaderLength := <span class="hljs-keyword">uint32</span>(<span class="hljs-number">9</span>)
-    payloadLength := <span class="hljs-built_in">len</span>(payload)
+    payloadLength := <span class="hljs-built_in">len</span>(data)
 
     payloadIdx := <span class="hljs-number">0</span>
     <span class="hljs-keyword">for</span> payloadIdx &lt; payloadLength {
         <span class="hljs-keyword">if</span> payloadIdx+<span class="hljs-keyword">int</span>(frameHeaderLength) &gt; payloadLength {
-            <span class="hljs-keyword">return</span> fmt.Errorf(<span class="hljs-string">"packet length is not equal with the packet length mentioned in frame header"</span>)
+            <span class="hljs-keyword">return</span> fmt.Errorf(<span class="hljs-string">"Payload length couldn't contain Frame Headers"</span>)
         }
 
-        frameLength := (<span class="hljs-keyword">uint32</span>(payload[payloadIdx+<span class="hljs-number">0</span>])&lt;&lt;<span class="hljs-number">16</span> | <span class="hljs-keyword">uint32</span>(payload[payloadIdx+<span class="hljs-number">1</span>])&lt;&lt;<span class="hljs-number">8</span> | <span class="hljs-keyword">uint32</span>(payload[payloadIdx+<span class="hljs-number">2</span>]))
-        rBit := payload[payloadIdx+<span class="hljs-number">5</span>] &gt;&gt; <span class="hljs-number">7</span>
+        framePayloadLength := (<span class="hljs-keyword">uint32</span>(data[payloadIdx+<span class="hljs-number">0</span>])&lt;&lt;<span class="hljs-number">16</span> | <span class="hljs-keyword">uint32</span>(data[payloadIdx+<span class="hljs-number">1</span>])&lt;&lt;<span class="hljs-number">8</span> | <span class="hljs-keyword">uint32</span>(data[payloadIdx+<span class="hljs-number">2</span>]))
+        frameLength := <span class="hljs-keyword">int</span>(frameHeaderLength + framePayloadLength)
+
+        rBit := data[payloadIdx+<span class="hljs-number">5</span>] &gt;&gt; <span class="hljs-number">7</span>
 
         <span class="hljs-keyword">if</span> rBit != <span class="hljs-number">0</span> {
             <span class="hljs-keyword">return</span> fmt.Errorf(<span class="hljs-string">"R bit is not unset"</span>)
         }
 
-        payloadIdx += <span class="hljs-keyword">int</span>(frameLength + frameHeaderLength)
+        <span class="hljs-keyword">if</span> payloadIdx+frameLength &gt; payloadLength {
+            <span class="hljs-keyword">return</span> fmt.Errorf(<span class="hljs-string">"Payload length couldn't contain Payload with the length mentioned in Frame Header"</span>)
+        }
+
+        <span class="hljs-keyword">var</span> framerOutput bytes.Buffer
+        r := bytes.NewReader(data[payloadIdx : payloadIdx+frameLength])
+        framer := http2.NewFramer(&amp;framerOutput, r)
+
+        frame, err := framer.ReadFrame()
+        <span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+            <span class="hljs-keyword">return</span> err
+        }
+        frames = <span class="hljs-built_in">append</span>(frames, frame)
+
+        payloadIdx += <span class="hljs-keyword">int</span>(frameLength)
     }
 
     <span class="hljs-keyword">if</span> payloadIdx != payloadLength {
-        <span class="hljs-keyword">return</span> fmt.Errorf(<span class="hljs-string">"packet length is not equal with the packet length mentioned in frame header"</span>)
+        <span class="hljs-keyword">return</span> fmt.Errorf(<span class="hljs-string">"Payload length is not equal with the Frame length mentioned in Frame Header"</span>)
     }
+
+    h.BaseLayer = layers.BaseLayer{Contents: data[:<span class="hljs-built_in">len</span>(data)]}
+    h.frames = frames
     <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
 }
-</code></pre><h4><code>// 1 DecodeFromBytes(data []byte, df gopacket.DecodeFeedback)</code></h4><p>This is where we want to utilize Go's <code>net/http2</code> package to decode the frame for us. First, we create a new <code>framer</code> and pass the data to the <code>framer</code>. Next we call the <code>ReadFrame</code> function to get the actual HTTP/2 frame.</p><h4><code>// 2 validateHTTP2(payload []byte)</code></h4><pre><code class="language-no-highlight">+-----------------------------------------------+
+</code></pre><h4><code>DecodeFromBytes(data []byte, df gopacket.DecodeFeedback)</code></h4><p>After multiple trials, I found out that http2.Framer would get stuck if we give a data that's not a valid HTTP/2 frame format (as depicted below). This means we need to find a way to classify whether the bytes of data is a valid frame or not. <a href="https://httpwg.org/specs/rfc7540.html">RFC 7540</a> document doesn't mention any way to classify a HTTP/2 frame, so I came up with a currently working solution by checking:</p><ul><li>Is the frame length specified in the frame header the same with the actual payload length?</li><li>Is the R bit is unset?</li></ul><pre><code class="language-no-highlight">+-----------------------------------------------+
 |                 Length (24)                   |
 +---------------+---------------+---------------+
 |   Type (8)    |   Flags (8)   |
@@ -82,7 +83,7 @@
 +=+=============================================================+
 |                   Frame Payload (0...)                      ...
 +---------------------------------------------------------------+
-</code></pre><p>After multiple trials, I found out that http2.Framer would get stuck if we give a data that's not a valid HTTP/2 frame. This means we need to find a way to classify whether the bytes of data is a valid frame or not. <a href="https://httpwg.org/specs/rfc7540.html">RFC 7540</a> document doesn't mention any way to classify a HTTP/2 frame, so I came up with a currently working solution by checking:</p><ul><li>Is the frame length specified in the frame header the same with the actual payload length?</li><li>Is the R bit is unset?</li></ul><h3>Intercepting the frames</h3><p>Next, we're going to capture the packet and decode the HTTP/2 frames.</p><pre data-language="go"><code><span class="hljs-keyword">package</span> main
+</code></pre><p>After we check the validity of the frame, we want to utilize Go's <code>net/http2</code> package to decode the frame for us. We do that by creating a new <code>framer</code> and pass the data to the <code>framer</code>. Next we call the <code>ReadFrame</code> function to get the actual HTTP/2 frame.</p><h3>Intercepting the frames</h3><p>Next, we're going to capture the packet and decode the HTTP/2 frames.</p><pre data-language="go"><code><span class="hljs-keyword">package</span> main
 
 <span class="hljs-keyword">import</span> (
     <span class="hljs-string">"bytes"</span>
