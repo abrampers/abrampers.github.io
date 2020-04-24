@@ -1,0 +1,43 @@
+apiVersion: v1
+entries:
+  inkle:
+  - apiVersion: v2
+    appVersion: v0.1.0
+    created: "2020-04-24T14:36:01.4482+07:00"
+    dependencies:
+    - condition: elastic.enabled
+      name: elasticsearch
+      repository: https://helm.elastic.co
+      version: 7.6.2
+    - condition: elastic.enabled
+      name: logstash
+      repository: https://helm.elastic.co
+      version: 7.6.2
+    - condition: elastic.enabled
+      name: kibana
+      repository: https://helm.elastic.co
+      version: 7.6.2
+    - condition: elastic.enabled
+      name: filebeat
+      repository: https://helm.elastic.co
+      version: 7.6.2
+    description: "Log Based gRPC Tracing System \U0001D318 on Kubernetes."
+    digest: d44639408cd879aaefdf595d21f6b09ddf352f2b50c57e3ad041a22dc32beb74
+    home: https://github.com/abrampers/inkle
+    keywords:
+    - gRPC
+    - Tracing
+    - Log
+    kubeVersion: 1.16.0 - 1.18.0
+    maintainers:
+    - email: abram.perdanaputra@gmail.com
+      name: Abram Situmorang
+      url: https://abram.id
+    name: inkle
+    sources:
+    - https://github.com/abrampers.inkle
+    type: application
+    urls:
+    - https://abram.id/helm/abrampers/inkle-0.1.0.tgz
+    version: 0.1.0
+generated: "2020-04-24T14:36:01.437752+07:00"
