@@ -3,7 +3,7 @@ entries:
   inkle:
   - apiVersion: v2
     appVersion: v0.1.0
-    created: "2020-04-24T17:57:24.74536+07:00"
+    created: "2020-04-26T15:23:30.67606+07:00"
     dependencies:
     - condition: elastic.enabled
       name: elasticsearch
@@ -22,7 +22,7 @@ entries:
       repository: https://helm.elastic.co
       version: 7.6.2
     description: "Log Based gRPC Tracing System \U0001D318 on Kubernetes."
-    digest: fd70a99e9caa407202b3794d951f0740e7bbb41f019743ded705af5de956f647
+    digest: d4cef0f5b5df612cc8626e9c0f2ce9e19c9f5fa8ded2d6c24aa9390337aaf43f
     home: https://github.com/abrampers/inkle
     keywords:
     - gRPC
@@ -40,4 +40,4 @@ entries:
     urls:
     - https://abram.id/helm/abrampers/inkle-0.1.0.tgz
     version: 0.1.0
-generated: "2020-04-24T17:57:24.735626+07:00"
+generated: "2020-04-26T15:23:30.668206+07:00"
