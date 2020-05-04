@@ -26,7 +26,7 @@ keywords:
 - - gRPC
 - - Tracing
 - - Log
-kubeVersion: 1.16.0 - 1.18.2
+kubeVersion: 1.14.0 - 1.18.2 || v1.14.0-r0 - v1.18.2-r0
 maintainers:
 - - email: abram.perdanaputra@gmail.com
   name: Abram Situmorang
@@ -39,14 +39,14 @@ version: 0.1.0
 
 ...
 files:
-  inkle-0.1.0.tgz: sha256:821b9f39955a2a6bc746c3cc404c424e45a1641a9999ab9bfad217b0ee17cc1b
+  inkle-0.1.0.tgz: sha256:679b5ee518769e9babb5b9a1881569084866ce4a89ae8766074da13282a50f44
 -----BEGIN PGP SIGNATURE-----
 
-wsBcBAEBCgAQBQJers8iCRDd/Sj7oPlMvwAA0X8IAEMcYiMu+EQqHpyhB+IORck4
-geW6Ga84cpN5WGm//Bj6eLnSIRhEiZjfpC9ooPcDtrSCwK45cD22Ki/FS8cXvwMD
-bMX1FJRXIFUBDGa24EDmjeIpiwWPzktRV5xJ4nQpLM41kGACpCuLdH4QhN5p/5v9
-8bv93BWVo0M5prtbt92P4H3RJbEQEGZEqUU1ZEd4LmVZXCKtw252Ckw1p+JdpNIP
-aLzbFuVeHn4gRF/LlmjVOU+TMstPvuAPR8PkhWXTPDE2fBDfKjBsffjDjeKMREu9
-5GsnEDl6CefskO88ThPO6gsHpyBZzbCKBTbHUSl32lICTdL3veUZ79kozqaq1as=
-=TJIi
+wsBcBAEBCgAQBQJer7OXCRDd/Sj7oPlMvwAAEJ0IAGaYz1sm0jKMau00ag9dX0MF
+0/80nz+Rq97H4WwCZe9P3twczcZvCJ6c4h7zRfM+9nU6VFTDTlYNvrFp3Q7PIYTo
+zmq23Bo+ZwC4XJP/L+cwqIsK/Q2XWkP6RU2n5eQl0ruvwj1AwRWEJmrcKcKtmFsd
+lLc04rBcclsfUZChTatjRBoM1LGb36GYyOGgYlZFnS0qRYVcIgmXT/SmpfdqON5h
+I5aWzBsLQdDmhGfMh+f3Iu5Ebt0dtjP3MFEHTmu+7sLraK5uKUijEn8Ly2+D+RvO
+gG+JhHYJj9pA86IVIJAFJYshhBcRK2pLQn321ognTHpAHZHjiTmOz9DaBUk9hE0=
+=nCkv
 -----END PGP SIGNATURE-----
