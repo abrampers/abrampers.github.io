@@ -473,6 +473,16 @@ article li code.inline {
 	padding: 0;
 }
 
+article p.info,
+blockquote p {
+	position: relative;
+	background-color: #efefef;
+	padding: 10px 10px 10px 15px;
+	border-top-right-radius: 7px;
+	border-bottom-right-radius: 7px;
+	border-left: 4px solid #2e4571;
+}
+
 @media (prefers-color-scheme: dark) {
     body {
         background-color: #222;
