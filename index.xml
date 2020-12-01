@@ -1,0 +1,977 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>abrampers.com</title>
+    <link>http://abrampers.com/</link>
+    <description>abrampers.com</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 25 Oct 2020 10:08:00 +0700</lastBuildDate>
+    
+    <atom:link href="http://abrampers.com/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>My take on The Composable Architecture</title>
+      <link>http://abrampers.com/blog/my-take-on-the-composable-architecture/</link>
+      <pubDate>Sun, 25 Oct 2020 10:08:00 +0700</pubDate>
+      
+      <guid>http://abrampers.com/blog/my-take-on-the-composable-architecture/</guid>
+      <description>&lt;!-- raw HTML omitted --&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#context-typical-ios-app-architecture&#34;&gt;Context: Typical iOS App Architecture&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#the-claim&#34;&gt;The claim&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#experiments&#34;&gt;Experiments&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#what-i-love&#34;&gt;What I love&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#what-i-don-t-love&#34;&gt;What I don&amp;rsquo;t love&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#where-should-i-go-next&#34;&gt;Where should I go next?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#references&#34;&gt;References&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;The Composable Architecture or TCA for short is a library to build application in a consistent and understandable manner, with composition, testing, and ergonomics in mind. This library is made by Point-Free to apply the concepts of functional programming in a practical way.&lt;/p&gt;
+&lt;h2 id=&#34;context-typical-ios-app-architecture&#34;&gt;Context: Typical iOS App Architecture&lt;/h2&gt;
+&lt;p&gt;In the world of iOS development, there&amp;rsquo;s a few 4 most commonly used patterns in architecting an iOS application. Most notably MVC, MVP, MVVM, and VIPER. The details of these architecture is beyond the scope of this article. All these architecture has their own advantages and drawbacks. For example, MVC is simple but misusing it will cause a Massive View Controller. VIPER provides a good testability but it&amp;rsquo;ll generate much boilerplate code. At the end of the day, architectural decisions are based on the combination of use case, complexity, and many other variables. So there&amp;rsquo;s no such thing as the silver bullet of iOS architecture.&lt;/p&gt;
+&lt;h2 id=&#34;the-claim&#34;&gt;The claim&lt;/h2&gt;
+&lt;p&gt;As the new guy in the iOS architecture neighborhood, TCA claims to provide:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Consistency&lt;/strong&gt;: degree of firmness, density, viscosity, or resistance to movement or separation of constituent particles&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Composition&lt;/strong&gt;: a product of mixing or combining various elements or ingredients&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Testing&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Ergonomics&lt;/strong&gt;: a product of mixing or combining various elements or ingredients&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In this blog, we&amp;rsquo;ll test whether TCA fulfills what it claims to do or not.&lt;/p&gt;
+&lt;h2 id=&#34;experiments&#34;&gt;Experiments&lt;/h2&gt;
+&lt;p&gt;We&amp;rsquo;ll create a song reader app that have the capability to add songs to favorites and see all the favorites we have. All the code snippet in this blog is taken from my &lt;a href=&#34;https://github.com/abrampers/lagu-sion-ios&#34;&gt;Lagu Sion implementation&lt;/a&gt;.&lt;/p&gt;
+&lt;h3 id=&#34;setting-up&#34;&gt;Setting up&lt;/h3&gt;
+&lt;p&gt;To install this library, generate a new iOS application in your Xcode and add TCA to your Swift Package Dependency. More info, &lt;a href=&#34;https://github.com/pointfreeco/swift-composable-architecture#installation&#34;&gt;head here&lt;/a&gt;.&lt;/p&gt;
+&lt;h3 id=&#34;building-the-app&#34;&gt;Building the app&lt;/h3&gt;
+&lt;p&gt;In this blog, I&amp;rsquo;ll build the app from the smallest component possible and work ourselves up and wire everything up.&lt;/p&gt;
+&lt;h4 id=&#34;modeling-song&#34;&gt;Modeling song&lt;/h4&gt;
+&lt;p&gt;Simple, we can make a struct that contains all the fields needed. In this case we need to generate the id and song&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swift&#34; data-lang=&#34;swift&#34;&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Song&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;Equatable&lt;/span&gt;, Identifiable {
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;id&lt;/span&gt;: UUID
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;number&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;Int&lt;/span&gt;
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;title&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;String&lt;/span&gt;
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;verses&lt;/span&gt;: [Verse]
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;reff&lt;/span&gt;: Verse?
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;songBook&lt;/span&gt;: SongBook
+
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;init&lt;/span&gt;(id: UUID, number: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;Int&lt;/span&gt;, title: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;String&lt;/span&gt;, verses: [Verse], reff: Verse? = &lt;span style=&#34;color:#ff79c6&#34;&gt;nil&lt;/span&gt;, songBook: SongBook) {
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.id = id
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.number = number
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.title = title
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.verses = verses
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.reff = reff
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.songBook = songBook
+    }
+
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;prefix&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;String&lt;/span&gt; { songBook.&lt;span style=&#34;color:#ff79c6&#34;&gt;prefix&lt;/span&gt; }
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;color&lt;/span&gt;: Color { songBook.color }
+}
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;SongViewState&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;Equatable&lt;/span&gt;, Identifiable {
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;id&lt;/span&gt;: UUID {
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; song.id
+    }
+
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;song&lt;/span&gt;: Song
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;isFavorite&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;Bool&lt;/span&gt;
+
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;init&lt;/span&gt;(song: Song, isFavorite: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;Bool&lt;/span&gt;) {
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.song = song
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.isFavorite = isFavorite
+    }
+}
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;extension&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;SongViewState&lt;/span&gt; {
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;number&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;Int&lt;/span&gt; { song.number }
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;title&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;String&lt;/span&gt; { song.title }
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;verses&lt;/span&gt;: [Verse] { song.verses }
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;reff&lt;/span&gt;: Verse? { song.reff }
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;prefix&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;String&lt;/span&gt; { song.&lt;span style=&#34;color:#ff79c6&#34;&gt;prefix&lt;/span&gt; }
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;color&lt;/span&gt;: Color { song.color }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id=&#34;modeling-action-to-be-made-on-song-view&#34;&gt;Modeling action to be made on Song View&lt;/h4&gt;
+&lt;p&gt;Simple, just use Swift’s enum to enumerate all the possible action.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swift&#34; data-lang=&#34;swift&#34;&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;enum&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;SongAction&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;Equatable&lt;/span&gt; {
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; heartTapped
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; removeFromFavorites
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; addToFavorites
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id=&#34;modeling-what-will-happen-when-action-appears&#34;&gt;Modeling what will happen when action appears&lt;/h4&gt;
+&lt;p&gt;Here, we start to use TCA’s first feature: Reducer. TCA will receive all the action that the views will trigger and after that, the action will be processed through the reducer. In TCA, reducer is the place where logic happens. State mutations, logical operation, and action handling is happening in the reducer.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swift&#34; data-lang=&#34;swift&#34;&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;songReducer&lt;/span&gt; = Reducer&amp;lt;SongViewState, SongAction, SongEnvironment&amp;gt; { state, action, environment &lt;span style=&#34;color:#ff79c6&#34;&gt;in&lt;/span&gt;
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;switch&lt;/span&gt; action {
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; .heartTapped:
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;!&lt;/span&gt;state.isFavorite {
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; Effect(value: SongAction.addToFavorites)
+        } &lt;span style=&#34;color:#ff79c6&#34;&gt;else&lt;/span&gt; {
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; Effect(value: SongAction.removeFromFavorites)
+        }
+
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; .addToFavorites, .removeFromFavorites:
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; .&lt;span style=&#34;color:#ff79c6&#34;&gt;none&lt;/span&gt;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id=&#34;implement-how-the-song-view-will-look-like&#34;&gt;Implement how the Song View will look like&lt;/h4&gt;
+&lt;p&gt;Simple, we create a view just like other SwiftUI views, but at the end, we’ll wire up the view with the state through a concept called &lt;code&gt;Store&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swift&#34; data-lang=&#34;swift&#34;&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;TitleView&lt;/span&gt;: View {
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;title&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;String&lt;/span&gt;
+
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;body&lt;/span&gt;: some View {
+        HStack {
+            Spacer()
+            Text(title)
+                .font(.system(size: &lt;span style=&#34;color:#bd93f9&#34;&gt;32&lt;/span&gt;, weight: .bold, design: .`&lt;span style=&#34;color:#ff79c6&#34;&gt;default&lt;/span&gt;`))
+                .multilineTextAlignment(.center)
+            Spacer()
+        }
+    }
+}
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;VerseView&lt;/span&gt;: View {
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;verse&lt;/span&gt;: Verse
+
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;body&lt;/span&gt;: some View {
+        VStack(alignment: .center, spacing: &lt;span style=&#34;color:#bd93f9&#34;&gt;10&lt;/span&gt;) {
+            ForEach(&lt;span style=&#34;color:#bd93f9&#34;&gt;0.&lt;/span&gt;.&amp;lt;&lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.verse.contents.count) { (j) &lt;span style=&#34;color:#ff79c6&#34;&gt;in&lt;/span&gt;
+                Text(&lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.verse.contents[j])
+            }
+        }
+    }
+}
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;SongView&lt;/span&gt;: View {
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;store&lt;/span&gt;: Store&amp;lt;SongViewState, SongAction&amp;gt;
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;enableFavoriteButton&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;Bool&lt;/span&gt;
+
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;init&lt;/span&gt;(store: Store&amp;lt;SongViewState, SongAction&amp;gt;, enableFavoriteButton: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;Bool&lt;/span&gt;) {
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.store = store
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.enableFavoriteButton = enableFavoriteButton
+    }
+
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;body&lt;/span&gt;: some View {
+        WithViewStore(&lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.store) { viewStore &lt;span style=&#34;color:#ff79c6&#34;&gt;in&lt;/span&gt;
+            ScrollView(.vertical, showsIndicators: &lt;span style=&#34;color:#ff79c6&#34;&gt;true&lt;/span&gt;) {
+                VStack(alignment: .center, spacing: &lt;span style=&#34;color:#bd93f9&#34;&gt;10&lt;/span&gt;) {
+                    Spacer()
+                    TitleView(title: viewStore.title)
+                    Spacer()
+                    ForEach(&lt;span style=&#34;color:#bd93f9&#34;&gt;0.&lt;/span&gt;.&amp;lt;viewStore.verses.count) { i &lt;span style=&#34;color:#ff79c6&#34;&gt;in&lt;/span&gt;
+                        Text(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;\(&lt;/span&gt;i &lt;span style=&#34;color:#ff79c6&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#bd93f9&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&lt;/span&gt;)
+                            .font(.system(.headline))
+                        VerseView(verse: viewStore.verses[i])
+                        Unwrap(viewStore.reff) { reff &lt;span style=&#34;color:#ff79c6&#34;&gt;in&lt;/span&gt;
+                            Spacer()
+                            VerseView(verse: reff)
+                        }
+                        Spacer()
+                    }
+                    Spacer()
+                }
+            }
+            .navigationBarTitle(Text(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;\(&lt;/span&gt;viewStore.&lt;span style=&#34;color:#ff79c6&#34;&gt;prefix&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt; no. &lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;\(&lt;/span&gt;viewStore.number&lt;span style=&#34;color:#f1fa8c&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&lt;/span&gt;))
+            .navigationBarItems(
+                trailing: Button(action: { viewStore.send(.heartTapped) }) {
+                    Image(systemName: viewStore.isFavorite ? &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;heart.fill&amp;#34;&lt;/span&gt; : &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;heart&amp;#34;&lt;/span&gt;)
+                }
+                .disabled(&lt;span style=&#34;color:#ff79c6&#34;&gt;!&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.enableFavoriteButton)
+            )
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id=&#34;previews&#34;&gt;Previews&lt;/h4&gt;
+&lt;p&gt;Since we haven’t wire up the view to any entry point, we can use SwiftUI previews to see how our view implementation is going.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swift&#34; data-lang=&#34;swift&#34;&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;internal&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;SongView_Previews&lt;/span&gt;: PreviewProvider {
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;previews&lt;/span&gt;: some View {
+        SongView(
+            store: Store(
+                initialState: SongViewState(
+                    song: Song(
+                        id: UUID(),
+                        number: &lt;span style=&#34;color:#bd93f9&#34;&gt;1&lt;/span&gt;,
+                        title: &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Di Hadapan Hadirat-Mu&amp;#34;&lt;/span&gt;,
+                        verses: [
+                            Verse(contents: [
+                                &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Di hadapan hadirat-Mu&amp;#34;&lt;/span&gt;,
+                                &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Kami umat-Mu menyembah&amp;#34;&lt;/span&gt;,
+                                &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Mengakui Engkau Tuhan&amp;#34;&lt;/span&gt;,
+                                &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Allah kekal, Maha kuasa&amp;#34;&lt;/span&gt;
+                            ]),
+                            Verse(contents: [
+                                &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Dari debu dan tanahlah&amp;#34;&lt;/span&gt;,
+                                &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;kita dijadikan Tuhan&amp;#34;&lt;/span&gt;,
+                                &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Dan bila tersesat kita&amp;#34;&lt;/span&gt;,
+                                &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Tuhan tak akan tinggalkan&amp;#34;&lt;/span&gt;,
+                            ]),
+                            Verse(contents: [
+                                &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Kuasa serta kasih Allah&amp;#34;&lt;/span&gt;,
+                                &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Memenuhi seg’nap dunia&amp;#34;&lt;/span&gt;,
+                                &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Tetap teguhlah firman-Nya&amp;#34;&lt;/span&gt;,
+                                &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Hingga penuh hadirat-Nya&amp;#34;&lt;/span&gt;,
+                            ]),
+                            Verse(contents: [
+                                &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Di pintu Surga yang suci&amp;#34;&lt;/span&gt;,
+                                &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;menyanyi beribu lidah&amp;#34;&lt;/span&gt;,
+                                &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Pada Tuhan kita puji&amp;#34;&lt;/span&gt;,
+                                &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Sekarang dan selamanya&amp;#34;&lt;/span&gt;,
+                            ])
+                        ], songBook: .laguSion
+                    ),
+                    isFavorite: &lt;span style=&#34;color:#ff79c6&#34;&gt;false&lt;/span&gt;
+                ),
+                reducer: songReducer,
+                environment: SongEnvironment()),
+            enableFavoriteButton: &lt;span style=&#34;color:#ff79c6&#34;&gt;true&lt;/span&gt;
+        )
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id=&#34;testing-the-implementation&#34;&gt;Testing the implementation&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swift&#34; data-lang=&#34;swift&#34;&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;SongTests&lt;/span&gt;: XCTestCase {
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;testHeartTapped_WithIsFavorite_False&lt;/span&gt;() {
+        &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;store&lt;/span&gt; = TestStore(
+            initialState: SongViewState(
+                song: Song(id: UUID(), number: &lt;span style=&#34;color:#bd93f9&#34;&gt;0&lt;/span&gt;, title: &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;, verses: [], songBook: .laguSion),
+                isFavorite: &lt;span style=&#34;color:#ff79c6&#34;&gt;false&lt;/span&gt;
+            ),
+            reducer: songReducer,
+            environment: SongEnvironment()
+        )
+
+        store.assert(
+            .send(.heartTapped),
+            .receive(.addToFavorites)
+        )
+    }
+
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;testHeartTapped_WithIsFavorite_True&lt;/span&gt;() {
+        &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;store&lt;/span&gt; = TestStore(
+            initialState: SongViewState(
+                song: Song(id: UUID(), number: &lt;span style=&#34;color:#bd93f9&#34;&gt;0&lt;/span&gt;, title: &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;, verses: [], songBook: .laguSion),
+                isFavorite: &lt;span style=&#34;color:#ff79c6&#34;&gt;true&lt;/span&gt;
+            ),
+            reducer: songReducer,
+            environment: SongEnvironment()
+        )
+
+        store.assert(
+            .send(.heartTapped),
+            .receive(.removeFromFavorites)
+        )
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;For now, let’s take a break from coding and look back what we have made here. First, we have modeled the state of the Song View and actions. Next the reducer and the view. TCA provides us with a framework to pass triggers from view to the reducer through &lt;code&gt;Store&lt;/code&gt; . With store, developer can make SwiftUI previews easily. This checks the first claim that TCA is ergonomic.&lt;/p&gt;
+&lt;p&gt;Second, testing. &lt;code&gt;Store&lt;/code&gt; concept also has it’s corresponding ergonomic component in testing named &lt;code&gt;TestStore&lt;/code&gt; . This component enable us to intercept the actions triggered, sequence of actions, or even checks the state after every action sent or received. This checks the second claim that TCA is designed with testing in mind.&lt;/p&gt;
+&lt;p&gt;Cool, so far we have covered how TCA is ergonomic and designed with testing in mind. Let’s go to the next part of the implementation to prove the rest TCA claims.&lt;/p&gt;
+&lt;h4 id=&#34;modeling-main-list-view&#34;&gt;Modeling Main List View&lt;/h4&gt;
+&lt;p&gt;In the list view state, we store two lists. The list of songs, and favorite songs.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swift&#34; data-lang=&#34;swift&#34;&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;MainState&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;Equatable&lt;/span&gt; {
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;songs&lt;/span&gt;: [Song]
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;favoriteSongs&lt;/span&gt;: [Song]
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;selectedBook&lt;/span&gt;: BookSelection
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;searchQuery&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;String&lt;/span&gt;
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;selectedSortOption&lt;/span&gt;: SortOptions
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;actionSheet&lt;/span&gt;: ActionSheetState&amp;lt;MainAction&amp;gt;?
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;alert&lt;/span&gt;: AlertState&amp;lt;MainAction&amp;gt;?
+
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;init&lt;/span&gt;(
+        songs: [Song] = [],
+        favoriteSongs: [Song] = [],
+        selectedBook: BookSelection = .all,
+        searchQuery: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;String&lt;/span&gt; = &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;,
+        selectedSortOptions: SortOptions = .number,
+        actionSheet: ActionSheetState&amp;lt;MainAction&amp;gt;? = &lt;span style=&#34;color:#ff79c6&#34;&gt;nil&lt;/span&gt;,
+        alert: AlertState&amp;lt;MainAction&amp;gt;? = &lt;span style=&#34;color:#ff79c6&#34;&gt;nil&lt;/span&gt;
+    ) {
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.songs = songs
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.favoriteSongs = favoriteSongs
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.selectedBook = selectedBook
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.searchQuery = searchQuery
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.selectedSortOption = selectedSortOptions
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.actionSheet = actionSheet
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.alert = alert
+    }
+}
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;extension&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;MainState&lt;/span&gt; {
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;currentSongs&lt;/span&gt;: [SongViewState] {
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;get&lt;/span&gt; {
+            &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;result&lt;/span&gt;: [Song] = []
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;switch&lt;/span&gt; selectedBook {
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; .all:
+                result = songs
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; .songBook(&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;songBook&lt;/span&gt;):
+                result = songs(&lt;span style=&#34;color:#ff79c6&#34;&gt;for&lt;/span&gt;: songBook)
+            }
+
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; result.map { song -&amp;gt; SongViewState &lt;span style=&#34;color:#ff79c6&#34;&gt;in&lt;/span&gt;
+                SongViewState(song: song, isFavorite: favoriteSongs.contains(song))
+            }
+        }
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;set&lt;/span&gt; {
+        }
+    }
+
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;songs&lt;/span&gt;(&lt;span style=&#34;color:#ff79c6&#34;&gt;for&lt;/span&gt; songBook: SongBook) -&amp;gt; [Song] {
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; songs.filter { song &lt;span style=&#34;color:#ff79c6&#34;&gt;in&lt;/span&gt;
+            song.songBook == songBook
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id=&#34;modeling-the-main-list-view-actions&#34;&gt;Modeling the Main List View Actions&lt;/h4&gt;
+&lt;p&gt;Here, we’re going to use our previously made &lt;code&gt;songReducer&lt;/code&gt; for each song we have in the main list.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swift&#34; data-lang=&#34;swift&#34;&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;enum&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;MainAction&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;Equatable&lt;/span&gt; {
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; actionSheetDismissed
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; alertDismissed
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; appear
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; error(LaguSionError)
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; getSongs
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; setSongs([Song])
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; saveSearchQuery(&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;String&lt;/span&gt;)
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; searchQueryChanged(&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;String&lt;/span&gt;)
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; song(index: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;Int&lt;/span&gt;, action: SongAction)
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; songBookPicked(BookSelection)
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; sortOptionChanged(SortOptions)
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; sortOptionTapped
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; updateFavoriteSongs(newFavorites: [Song])
+
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; noOp
+}
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;mainReducer&lt;/span&gt;: Reducer&amp;lt;MainState, MainAction, MainEnvironment&amp;gt; = .combine(
+    songReducer.forEach(
+        state: \MainState.currentSongs,
+        action: &lt;span style=&#34;color:#ff79c6&#34;&gt;/&lt;/span&gt;MainAction.song(index:action:),
+        environment: { &lt;span style=&#34;color:#ff79c6&#34;&gt;_&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;in&lt;/span&gt; SongEnvironment() }
+    ),
+    &lt;span style=&#34;color:#6272a4&#34;&gt;// ...&lt;/span&gt;
+)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Let’s take a break and see what we did. First, we model the &lt;code&gt;MainState&lt;/code&gt; just as we did on &lt;code&gt;SongViewState&lt;/code&gt; . After that, we create the model of &lt;code&gt;MainAction&lt;/code&gt; and &lt;code&gt;mainReducer&lt;/code&gt; . This shows that building component in TCA is consistent. Every layer of the implementation follows the same consistent pattern. This checks the consistency claim.&lt;/p&gt;
+&lt;p&gt;Next, TCA also gave us the tools we need to reuse and compose the &lt;code&gt;songReducer&lt;/code&gt; in the &lt;code&gt;mainReducer&lt;/code&gt;. As we know, the main state, composes song state directly or indirectly. If this happens, we can always compose any state with many other smaller states and we can still have the visibility of anything that happens in the child component. This checks the composability claim.&lt;/p&gt;
+&lt;p&gt;Last experiment I’d like to show is to fast forward on how we’re going to wire multiple sibling states to the root state.&lt;/p&gt;
+&lt;p&gt;Assume we have implemented the &lt;code&gt;Settings&lt;/code&gt; and &lt;code&gt;Favorites&lt;/code&gt; section.&lt;/p&gt;
+&lt;h4 id=&#34;model-app-state&#34;&gt;Model App State&lt;/h4&gt;
+&lt;p&gt;To wire up all the sibling states to single state, we have to define how are the &lt;code&gt;AppState&lt;/code&gt; behave when there’s a change in &lt;code&gt;AppState&lt;/code&gt; or if there’s any changes in the child states.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swift&#34; data-lang=&#34;swift&#34;&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;AppState&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;Equatable&lt;/span&gt; {
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;songs&lt;/span&gt;: [Song] = []
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;favoriteSongs&lt;/span&gt;: [Song] = []
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;selectedBook&lt;/span&gt;: BookSelection = .all
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;selectedSortOptions&lt;/span&gt;: SortOptions = .number
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;searchQuery&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;String&lt;/span&gt; = &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;mainActionSheet&lt;/span&gt;: ActionSheetState&amp;lt;MainAction&amp;gt;? = &lt;span style=&#34;color:#ff79c6&#34;&gt;nil&lt;/span&gt;
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;mainAlert&lt;/span&gt;: AlertState&amp;lt;MainAction&amp;gt;? = &lt;span style=&#34;color:#ff79c6&#34;&gt;nil&lt;/span&gt;
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;isAvailableOffline&lt;/span&gt;: &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;Bool&lt;/span&gt; = &lt;span style=&#34;color:#ff79c6&#34;&gt;false&lt;/span&gt;
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;fontSelection&lt;/span&gt;: FontSelection = .normal
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;contentSizeSelection&lt;/span&gt;: ContentSizeSelection = .normal
+}
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;extension&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;AppState&lt;/span&gt; {
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;main&lt;/span&gt;: MainState {
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;get&lt;/span&gt; {
+            MainState(
+                songs: &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.songs,
+                favoriteSongs: &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.favoriteSongs,
+                selectedBook: &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.selectedBook,
+                searchQuery: &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.searchQuery,
+                selectedSortOptions: &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.selectedSortOptions,
+                actionSheet: &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.mainActionSheet,
+                alert: &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.mainAlert
+            )
+        }
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;set&lt;/span&gt; {
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.songs = newValue.songs
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.favoriteSongs = newValue.favoriteSongs
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.selectedBook = newValue.selectedBook
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.searchQuery = newValue.searchQuery
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.selectedSortOptions = newValue.selectedSortOption
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.mainActionSheet = newValue.actionSheet
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.mainAlert = newValue.alert
+        }
+    }
+
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;favorites&lt;/span&gt;: FavoritesState {
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;get&lt;/span&gt; {
+            FavoritesState(songs: &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.songs, favoriteSongs: &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.favoriteSongs)
+        }
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;set&lt;/span&gt; {
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.songs = newValue.songs
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.favoriteSongs = newValue.favoriteSongs
+        }
+    }
+
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;settings&lt;/span&gt;: SettingsState {
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;get&lt;/span&gt; {
+            SettingsState(
+                isAvailableOffline: &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.isAvailableOffline,
+                fontSelection: &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.fontSelection,
+                contentSizeSelection: &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.contentSizeSelection
+            )
+        }
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;set&lt;/span&gt; {
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.isAvailableOffline = newValue.isAvailableOffline
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.fontSelection = newValue.fontSelection
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;self&lt;/span&gt;.contentSizeSelection = newValue.contentSizeSelection
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id=&#34;model-action-and-reducer&#34;&gt;Model Action and Reducer&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-swift&#34; data-lang=&#34;swift&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;enum&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;AppAction&lt;/span&gt; {
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; main(MainAction)
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; favorites(FavoritesAction)
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;case&lt;/span&gt; settings(SettingsAction)
+}
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;appReducer&lt;/span&gt;: Reducer&amp;lt;AppState, AppAction, AppEnvironment&amp;gt; = .combine(
+    mainReducer.pullback(
+        state: \AppState.main,
+        action: &lt;span style=&#34;color:#ff79c6&#34;&gt;/&lt;/span&gt;AppAction.main,
+        environment: { env &lt;span style=&#34;color:#ff79c6&#34;&gt;in&lt;/span&gt;
+            MainEnvironment(
+                mainQueue: env.mainQueue,
+                laguSionDataSource: env.laguSionDataSource
+            )
+        }
+    ),
+    favoritesReducer.pullback(
+        state: \AppState.favorites,
+        action: &lt;span style=&#34;color:#ff79c6&#34;&gt;/&lt;/span&gt;AppAction.favorites,
+        environment: { &lt;span style=&#34;color:#ff79c6&#34;&gt;_&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;in&lt;/span&gt; FavoritesEnvironment() }
+    ),
+    settingsReducer.pullback(
+        state: \AppState.settings,
+        action: &lt;span style=&#34;color:#ff79c6&#34;&gt;/&lt;/span&gt;AppAction.settings,
+        environment: { &lt;span style=&#34;color:#ff79c6&#34;&gt;_&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;in&lt;/span&gt; SettingsEnvironment() }
+    )
+)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Let’s stop and review again. In this section, we made the state, actions, and reducer. But if we look closely, &lt;code&gt;appReducer&lt;/code&gt; is doing nothing but composing all the child reducers and passing its respective states and actions using &lt;code&gt;pullback&lt;/code&gt;. This ultimately checks again the composability claim of TCA.&lt;/p&gt;
+&lt;h2 id=&#34;what-i-love&#34;&gt;What I love&lt;/h2&gt;
+&lt;p&gt;As we can see from the experiment, TCA delivers what it promised. Consistency, Composability, Testing, and Ergonomic. Personally, my favorite thing in TCA is how we can build mini components and wire it up to the chain until it has reaches the root/single source of truth. This ensures data consistency throughout screen and states.&lt;/p&gt;
+&lt;h2 id=&#34;what-i-don-t-love&#34;&gt;What I don&amp;rsquo;t love&lt;/h2&gt;
+&lt;p&gt;Right now, there&amp;rsquo;s no valid proof that this architecture is used in a huge app with high complexity. So we still have no idea on the extent of this architecture.&lt;/p&gt;
+&lt;h2 id=&#34;where-should-i-go-next&#34;&gt;Where should I go next?&lt;/h2&gt;
+&lt;p&gt;If you&amp;rsquo;re interested in how this library is designed, go to &lt;a href=&#34;https://www.pointfree.co/collections/composable-architecture&#34;&gt;Composable Architecture series&lt;/a&gt;. If you&amp;rsquo;re into functional programming, especially in Swift, check out &lt;a href=&#34;https://www.pointfree.co&#34;&gt;Point-Free&amp;rsquo;s site&lt;/a&gt;. They cover a lot of interesting ideas of functional programming specifically in Swift. If need more example of a working app using TCA, visit &lt;a href=&#34;https://github.com/pointfreeco/swift-composable-architecture#examples&#34;&gt;TCA&amp;rsquo;s GitHub examples&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/pointfreeco/swift-composable-architecture&#34;&gt;https://github.com/pointfreeco/swift-composable-architecture&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Formula 1 Cars is a Fascinating Engineering Problem / Masterpiece</title>
+      <link>http://abrampers.com/blog/formula-1-cars-is-a-fascinating-engineering-problem-masterpiece/</link>
+      <pubDate>Thu, 08 Oct 2020 23:19:00 +0700</pubDate>
+      
+      <guid>http://abrampers.com/blog/formula-1-cars-is-a-fascinating-engineering-problem-masterpiece/</guid>
+      <description>&lt;!-- raw HTML omitted --&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#context&#34;&gt;Context&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#why&#34;&gt;Why?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#aspects-of-a-formula-1-car&#34;&gt;Aspects of a Formula 1 Car&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#conclusion&#34;&gt;Conclusion&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#references&#34;&gt;References&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;http://abrampers.com/images/f1-vettel-ferrari.jpg&#34;
+         alt=&#34;Figure 1: Sebastian Vettel on his Ferrari (Photo by Sven Brandsma on Unsplash)&#34; width=&#34;800&#34;/&gt; &lt;figcaption&gt;
+            &lt;p&gt;Figure 1: Sebastian Vettel on his Ferrari (Photo by &lt;a href=&#34;https://unsplash.com/@seffen99?utm%5Fsource=unsplash&amp;amp;utm%5Fmedium=referral&amp;amp;utm%5Fcontent=creditCopyText&#34;&gt;Sven Brandsma&lt;/a&gt; on &lt;a href=&#34;https://unsplash.com/s/photos/formula-1?utm%5Fsource=unsplash&amp;amp;utm%5Fmedium=referral&amp;amp;utm%5Fcontent=creditCopyText&#34;&gt;Unsplash&lt;/a&gt;)&lt;/p&gt;
+        &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;How incredible all the cars on the grid are. Every one of those machines are extreme in a way that it is hard to comprehend unless you work inside a team or unless you physically stand in the fast corner and be really close to it and watching it as it goes to a corner. Because only then you can really, really appreciate how utterly amazing the performace is.&lt;/p&gt;
+&lt;p&gt;- James Allison, Chief Technical Director Mercedes-AMG F1 Team [1]&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Formula 1 cars is a fascinating engineering problem because in designing it, the engineers have to think through hundreds of parts from design, testing, race day, to updates phase and make sure that each part can work nicely along the others to achieve the main goal to win championships.&lt;/p&gt;
+&lt;p&gt;Before going into details, let&amp;rsquo;s set the context.&lt;/p&gt;
+&lt;h2 id=&#34;context&#34;&gt;Context&lt;/h2&gt;
+&lt;p&gt;Formula 1 cars are the cars used to compete in Formula 1 - the highest class of international single-seater auto racing. [2]&lt;/p&gt;
+&lt;h3 id=&#34;the-goal&#34;&gt;The Goal&lt;/h3&gt;
+&lt;p&gt;The ultimate goal in participating in Formula 1 competition is to win the championship. In order to win the championship, the team / driver have to win races. And to win a race, the team / driver have to be the quickest on the grid.&lt;/p&gt;
+&lt;h3 id=&#34;the-situation&#34;&gt;The Situation&lt;/h3&gt;
+&lt;p&gt;But however, there are some constraints while producing the quickest car on the grid.&lt;/p&gt;
+&lt;h4 id=&#34;regulation&#34;&gt;Regulation&lt;/h4&gt;
+&lt;p&gt;Just like other competitions, there are rules to be followed. But in F1, the rules are more complex because it is covering the whole workflow from designing each part, what each part is allowed to do, what are the interfaces the drivers are allowed to use, how to conduct testing, and &lt;a href=&#34;https://www.fia.com/regulation/category/110&#34;&gt;many more&lt;/a&gt;.&lt;/p&gt;
+&lt;h4 id=&#34;resources&#34;&gt;Resources&lt;/h4&gt;
+&lt;p&gt;As a business, F1 teams are also constrained by money generated by sponsorship deals, manpower, and time (where testing time is also regulated).&lt;/p&gt;
+&lt;h4 id=&#34;driver-s-preferences&#34;&gt;Driver&amp;rsquo;s Preferences&lt;/h4&gt;
+&lt;p&gt;At the race day, the car will be driven by the team’s driver. It is critical to have a car that the driver can use effectively and efficiently.&lt;/p&gt;
+&lt;h4 id=&#34;track-variability&#34;&gt;Track Variability&lt;/h4&gt;
+&lt;p&gt;Throughout the season, races will be conducted on different tracks with its own characteristics. Some of the variables here are corner speed, banking degrees, and DRS zones.&lt;/p&gt;
+&lt;h4 id=&#34;weather-variability&#34;&gt;Weather Variability&lt;/h4&gt;
+&lt;p&gt;Races will be conducted on both dry and wet conditions. This requires the car to be able to perform well in hot and cold conditions &amp;amp; grippy and slippery conditions.&lt;/p&gt;
+&lt;h2 id=&#34;why&#34;&gt;Why?&lt;/h2&gt;
+&lt;p&gt;As a software engineer, I like to use distributed systems as an analogy to a F1 car. In distributed systems, we will have multiple small components that communicate to each other. The components will have their own responsibility. Finally when all the components are woven in together nicely, the distributed system is able to solve particular problem or to reach a certain goal.&lt;/p&gt;
+&lt;p&gt;F1 cars are the same. It also consists of multiple components such as front wing, rear wing, front suspensions, rear suspensions, wheels, barge boards, power unit, gearbox, and more. In order to be the quickest car on the grid, all of these components and the subcomponents inside it should work nicely when assembled to a unit of F1 car. Meaning that when everything is assembled, every component should be adding or multiplying positive value not negative value.&lt;/p&gt;
+&lt;p&gt;But sometimes not all design will be possible. Tracks will be different. The cars have to be flexible enough to be set up to adapt to the different situations it will face. Tradeoffs (in both design and setup) must be made to optimize all the resource a team had to produce the quickest car possible on every race.&lt;/p&gt;
+&lt;p&gt;One more analogy between distributed systems and F1 cars is if we’re to build a distributed systems, the knowledge of all the principles of distributed systems and computer science are critical to make correct decision. F1 cars is the same. Having a deep knowledge physics knowledge on how the car behaves is the thing that enables the team to design a quick car and improve it further.&lt;/p&gt;
+&lt;p&gt;In the next section, I’ll explain in detail of what each major components do and how they interact with each other.&lt;/p&gt;
+&lt;h2 id=&#34;aspects-of-a-formula-1-car&#34;&gt;Aspects of a Formula 1 Car&lt;/h2&gt;
+&lt;h3 id=&#34;power-unit&#34;&gt;Power Unit&lt;/h3&gt;
+&lt;p&gt;Currently, F1 cars use hybrid power unit with 4 stroke internal combustion engine. The power unit will generate power by suck, squeeze, bang, blow phases on the fuel. The fuel will flow from the tank to the engine cylinders in a regulated rate. So no team can cheat by having more fuel per amount of time. The power generated will turn the axle who’s connected to the gearbox. The gearbox’s purpose here is to make sure the engine is operating in the optimal RPM to produce the maximum amount of power.&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;http://abrampers.com/images/f1-austria-neutral-lap.png&#34;
+         alt=&#34;Figure 2: Power generation on particular point in the lap [3]&#34; width=&#34;800&#34;/&gt; &lt;figcaption&gt;
+            &lt;p&gt;Figure 2: Power generation on particular point in the lap [3]&lt;/p&gt;
+        &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;In the image above, we can see where the power is coming from at any point in the track. This is one of the neutral cases. It will have a different setup for more aggressive or conservative mode.&lt;/p&gt;
+&lt;p&gt;The power unit is mainly tightly coupled the chassis. First case is given all things equal. If the power unit is able to operate in a higher temperature, the car can have smaller radiator. Smaller radiator means slimmer chassis, and slimmer chassis means less drag. Second case is given all things equal, with more power, the drag force will be higher. As a result of that, the downforce will be higher.&lt;/p&gt;
+&lt;h3 id=&#34;chassis-x-aerodynamics&#34;&gt;Chassis x Aerodynamics&lt;/h3&gt;
+&lt;p&gt;Chassis is the largest part of a F1 car. Chassis determines whether the car can behave as expected or not. For example, with the right combination of drag x downforce x power, the driver can handle the car better and faster through a corner. When something is missing on one of the three sections, the car would be undrivable. Meaning it is not fast, hard to handle, and not behaving as expected. Obviously this can lead to oblivion (position loss, points loss, crashes).&lt;/p&gt;
+&lt;p&gt;Another important part of the chassis is how does it interact with the wheels. Does the chassis distort the wheel shape? If it does, what shape will the wheels have? Why is this important? If the chassis is not interacting with the wheels positively, the tyre wear will be bad. Meaning the life of a set of tyre will be lower. This will result to more pit stops and having a worse handling on bad tyres.&lt;/p&gt;
+&lt;p&gt;One interesting point I’d like to point out is the front wing and the barge boards. Front wing is the first place the air make contact with the car. Front wing will redirect the airflow to the wheel. After the air passes the wheel, the bargeboards are there to receive the air and redirect it to the floor to generate more downforce.&lt;/p&gt;
+&lt;p&gt;You’re hearing a lot of downforce in this section. Downforce is very important to a F1 car because by having higher downforce, F1 car will be able to go to a corner in a higher speed. Imagine there are 18 corners in a track. By having a higher turning speed, the car will have much quicker lap time.&lt;/p&gt;
+&lt;h3 id=&#34;suspensions-4&#34;&gt;Suspensions [4]&lt;/h3&gt;
+&lt;p&gt;Suspensions are the component that will be setup differently for each track and driver. Why does this happen? Suspension setup is modifying the grip differential between front and rear tyres. By having more front grip, the car will be much easier to oversteer (rear part sliding) whereas by having more rear grip, the car is prone to understeer (hard to turn). Different drivers have different preferences on these part.&lt;/p&gt;
+&lt;p&gt;Suspensions can vary from hard to soft. Softer suspensions can absorb bumps more effectively, but at the cost of higher tyre wear. Harder suspension absorb less bump, meaning the whole car can be shaking when hitting a bump, but this has lower tyre wear than softer suspensions.&lt;/p&gt;
+&lt;p&gt;Suspension also affect the ride height or the distance between the road to the floor of the car. Higher ride height will cause higher drag and more downforce whereas lower ride height cause lower drag and less downforce.&lt;/p&gt;
+&lt;p&gt;Suspension also affect camber and toe. Camber is how the tyre contact the road vertically and toe is how the tyre contact the road horizontally. Adjusting camber can affect tyre wear. So if you got unoptimal camber, tyre wear will be bad. Toe in the other hand effect the turning response of a car. Meaning open toe will have better turning behavior, but more drag in the straight line since the tyre won’t be perfectly perpendicular with the direction.&lt;/p&gt;
+&lt;h3 id=&#34;wheels&#34;&gt;Wheels&lt;/h3&gt;
+&lt;p&gt;All F1 cars currently have the same set of wheels to choose from (Soft, Medium, Hard, Intermediate, Wet). The challenge here is to make sure that the car can extract all the tyre life given by the tyre. If a car can only work with one type of tyre, then the team is tightly coupled with a race strategy and results an inflexible team.&lt;/p&gt;
+&lt;h2 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;F1 cars are extremely fascinating and gives the engineer a different set of problem each race, each season. They have to design a thousands of good part, integrate the part to the car, and make sure it has positive impact to the championship. They have to iterate update process after race and make sure that the car is better for the next race. Truly, F1 cars are an engineering masterpiece.&lt;/p&gt;
+&lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=URJcgCWxl9M&#34;&gt;James Allison: r/Formula1 Ask Me Anything&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Formula%5FOne&#34;&gt;F1 - Wikipedia&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=RwwUOYTbyfs&#34;&gt;How Do F1 Power Units ACTUALLY Work? | F1 Engines Explained!&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=JbqEtApATZg&#34;&gt;How Do Setups Work On An F1 Car?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=28sptR3UY90&#34;&gt;The 2020 Mercedes F1 Car Explained!&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Intercepting HTTP/2 Packets without Wireshark</title>
+      <link>http://abrampers.com/blog/intercepting-http-2-packets-without-wireshark/</link>
+      <pubDate>Thu, 12 Mar 2020 23:19:00 +0700</pubDate>
+      
+      <guid>http://abrampers.com/blog/intercepting-http-2-packets-without-wireshark/</guid>
+      <description>&lt;!-- raw HTML omitted --&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#http-2-what-is-it&#34;&gt;HTTP/2, what is it?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#intercepting-the-actual-packets&#34;&gt;Intercepting the actual packets&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#conclusion&#34;&gt;Conclusion&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;h2 id=&#34;http-2-what-is-it&#34;&gt;HTTP/2, what is it?&lt;/h2&gt;
+&lt;p&gt;I never knew HTTP/2 until I bumped into gRPC, which uses HTTP/2 as its Layer 7 protocol. At first, it seems that HTTP/2 is just like another update of the commonly used HTTP/1.1. Yet HTTP/2 is a new HTTP protocol designed to deal with the limitations of HTTP/1.1.&lt;/p&gt;
+&lt;p&gt;For a bit of context, HTTP/1.1 had plenty of latency and inefficiency issues that made the performance of common internet webpage (that relies heavily on HTTP protocols) extremely hard to optimize. The first time we open a web page, it usually requires requesting a dozen resources from stylesheets, images, JavaScript codes, and other API calls. HTTP/1.1 does this by creating an equal number of TCP connection to get the resources in a parallel fashion. This means when the server is processing and preparing the response, the TCP connection is doing nothing but waiting for the server to give the response. This is very inefficient considering every single TCP connection made is doing nothing for some time. Plus there is always a cost when opening a TCP connection and closing it. So it is very inefficient to use one TCP connection per HTTP request.&lt;/p&gt;
+&lt;p&gt;HTTP/2 was made to solve some of the problems by enabling TCP to be multiplexed for multiple HTTP requests. So with HTTP/2, we will be opening less number of TCP connections compared to HTTP/1.1. HTTP/2 also enables a TCP connection to be reused for multiple request, no more one TCP connection per HTTP request. These two features will improve the utilization of the TCP connection.&lt;/p&gt;
+&lt;p&gt;Another main difference of HTTP/2 and HTTP/1.1 is that HTTP/2 is binary, while HTTP/1.1 is textual. On one hand, this gives us the benefit of speed since computers are good with binaries. Yet on the other hand, it is more difficult to debug since humans are not very good with binaries. To add on, what&amp;rsquo;s more interesting is even the HTTP/2 headers are compressed for performance reasons. These two features increase the complexity to intercept and process HTTP/2 packets from the previous HTTP/1.1 where we could just read the whole payload text.&lt;/p&gt;
+&lt;p&gt;Aside from features mentioned above, there are plenty of other features of HTTP/2 you can read in the &lt;a href=&#34;https://httpwg.org/specs/rfc7540.html&#34;&gt;RFC 7540&lt;/a&gt; document.&lt;/p&gt;
+&lt;h2 id=&#34;intercepting-the-actual-packets&#34;&gt;Intercepting the actual packets&lt;/h2&gt;
+&lt;p&gt;At this time of writing, I haven&amp;rsquo;t found any way to intercept and decode HTTP/2 packet other than &lt;a href=&#34;https://www.wireshark.org&#34;&gt;Wireshark&lt;/a&gt;. Wireshark is obviously a great tool for network analysis, but at other times, we want to intercept and process the packet built in right onto our applications. In this use case, Wireshark is not a suitable option, so we need to integrate HTTP/2 into existing packet interception library.&lt;/p&gt;
+&lt;p&gt;To intercept the packets, I will be using Go with Google&amp;rsquo;s &lt;a href=&#34;https://github.com/google/gopacket&#34;&gt;gopacket&lt;/a&gt;. This stack is my go to choice because Go have the first class support for HTTP and HTTP2 and Gopacket itself is fairly extensible.&lt;/p&gt;
+&lt;p&gt;From here onwards we&amp;rsquo;ll use the term &amp;ldquo;frame&amp;rdquo; to represent the unit of transfer of an HTTP/2 traffic.&lt;/p&gt;
+&lt;h3 id=&#34;implementing-the-layers&#34;&gt;Implementing the layers&lt;/h3&gt;
+&lt;p&gt;Since Gopacket doesn&amp;rsquo;t support HTTP/2 as its application layer, we need to tell Gopacket about the structure of HTTP/2 frame using the code below.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;// Create a layer type and give it a name and a decoder to use.
+&lt;/span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; LayerTypeHTTP2 = gopacket.&lt;span style=&#34;color:#50fa7b&#34;&gt;RegisterLayerType&lt;/span&gt;(&lt;span style=&#34;color:#bd93f9&#34;&gt;12345&lt;/span&gt;, gopacket.LayerTypeMetadata{Name: &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;HTTP2&amp;#34;&lt;/span&gt;, Decoder: gopacket.&lt;span style=&#34;color:#50fa7b&#34;&gt;DecodeFunc&lt;/span&gt;(decodeHTTP2)})
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;type&lt;/span&gt; HTTP2 &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; {
+    layers.BaseLayer
+
+    frames []http2.Frame
+}
+
+&lt;span style=&#34;color:#6272a4&#34;&gt;// Implement layer&amp;#39;s metadata
+&lt;/span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;func&lt;/span&gt; (h HTTP2) &lt;span style=&#34;color:#50fa7b&#34;&gt;LayerType&lt;/span&gt;() gopacket.LayerType      { &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; LayerTypeHTTP2 }
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;func&lt;/span&gt; (h &lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;HTTP2) &lt;span style=&#34;color:#50fa7b&#34;&gt;Payload&lt;/span&gt;() []&lt;span style=&#34;color:#8be9fd&#34;&gt;byte&lt;/span&gt;                   { &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;nil&lt;/span&gt; }
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;func&lt;/span&gt; (h &lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;HTTP2) &lt;span style=&#34;color:#50fa7b&#34;&gt;CanDecode&lt;/span&gt;() gopacket.LayerClass    { &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; LayerTypeHTTP2 }
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;func&lt;/span&gt; (h &lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;HTTP2) &lt;span style=&#34;color:#50fa7b&#34;&gt;NextLayerType&lt;/span&gt;() gopacket.LayerType { &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; gopacket.LayerTypeZero }
+
+&lt;span style=&#34;color:#6272a4&#34;&gt;// Implement the decoder function to be used
+&lt;/span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;decodeHTTP2&lt;/span&gt;(data []&lt;span style=&#34;color:#8be9fd&#34;&gt;byte&lt;/span&gt;, p gopacket.PacketBuilder) &lt;span style=&#34;color:#8be9fd&#34;&gt;error&lt;/span&gt; {
+    h &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;amp;&lt;/span&gt;HTTP2{}
+    err &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; h.&lt;span style=&#34;color:#50fa7b&#34;&gt;DecodeFromBytes&lt;/span&gt;(data, p)
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; err &lt;span style=&#34;color:#ff79c6&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;nil&lt;/span&gt; {
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; err
+    }
+    p.&lt;span style=&#34;color:#50fa7b&#34;&gt;AddLayer&lt;/span&gt;(h)
+    p.&lt;span style=&#34;color:#50fa7b&#34;&gt;SetApplicationLayer&lt;/span&gt;(h)
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;nil&lt;/span&gt;
+}
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;func&lt;/span&gt; (h &lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;HTTP2) &lt;span style=&#34;color:#50fa7b&#34;&gt;Frames&lt;/span&gt;() []http2.Frame {
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; h.frames
+}
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;func&lt;/span&gt; (h &lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;HTTP2) &lt;span style=&#34;color:#50fa7b&#34;&gt;DecodeFromBytes&lt;/span&gt;(data []&lt;span style=&#34;color:#8be9fd&#34;&gt;byte&lt;/span&gt;, df gopacket.DecodeFeedback) &lt;span style=&#34;color:#8be9fd&#34;&gt;error&lt;/span&gt; {
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; frames []http2.Frame
+    frameHeaderLength &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;uint32&lt;/span&gt;(&lt;span style=&#34;color:#bd93f9&#34;&gt;9&lt;/span&gt;)
+    payloadLength &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;len&lt;/span&gt;(data)
+
+    payloadIdx &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#bd93f9&#34;&gt;0&lt;/span&gt;
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;for&lt;/span&gt; payloadIdx &amp;lt; payloadLength {
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; payloadIdx&lt;span style=&#34;color:#ff79c6&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;int&lt;/span&gt;(frameHeaderLength) &amp;gt; payloadLength {
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; fmt.&lt;span style=&#34;color:#50fa7b&#34;&gt;Errorf&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Payload length couldn&amp;#39;t contain Frame Headers&amp;#34;&lt;/span&gt;)
+        }
+
+        framePayloadLength &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; (&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;uint32&lt;/span&gt;(data[payloadIdx&lt;span style=&#34;color:#ff79c6&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#bd93f9&#34;&gt;0&lt;/span&gt;])&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#bd93f9&#34;&gt;16&lt;/span&gt; | &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;uint32&lt;/span&gt;(data[payloadIdx&lt;span style=&#34;color:#ff79c6&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#bd93f9&#34;&gt;1&lt;/span&gt;])&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#bd93f9&#34;&gt;8&lt;/span&gt; | &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;uint32&lt;/span&gt;(data[payloadIdx&lt;span style=&#34;color:#ff79c6&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#bd93f9&#34;&gt;2&lt;/span&gt;]))
+        frameLength &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;int&lt;/span&gt;(frameHeaderLength &lt;span style=&#34;color:#ff79c6&#34;&gt;+&lt;/span&gt; framePayloadLength)
+
+        rBit &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; data[payloadIdx&lt;span style=&#34;color:#ff79c6&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#bd93f9&#34;&gt;5&lt;/span&gt;] &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#bd93f9&#34;&gt;7&lt;/span&gt;
+
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; rBit &lt;span style=&#34;color:#ff79c6&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#bd93f9&#34;&gt;0&lt;/span&gt; {
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; fmt.&lt;span style=&#34;color:#50fa7b&#34;&gt;Errorf&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;R bit is not unset&amp;#34;&lt;/span&gt;)
+        }
+
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; payloadIdx&lt;span style=&#34;color:#ff79c6&#34;&gt;+&lt;/span&gt;frameLength &amp;gt; payloadLength {
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; fmt.&lt;span style=&#34;color:#50fa7b&#34;&gt;Errorf&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Payload length couldn&amp;#39;t contain Payload with the length mentioned in Frame Header&amp;#34;&lt;/span&gt;)
+        }
+
+        &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; framerOutput bytes.Buffer
+        r &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; bytes.&lt;span style=&#34;color:#50fa7b&#34;&gt;NewReader&lt;/span&gt;(data[payloadIdx : payloadIdx&lt;span style=&#34;color:#ff79c6&#34;&gt;+&lt;/span&gt;frameLength])
+        framer &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; http2.&lt;span style=&#34;color:#50fa7b&#34;&gt;NewFramer&lt;/span&gt;(&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;amp;&lt;/span&gt;framerOutput, r)
+
+        frame, err &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; framer.&lt;span style=&#34;color:#50fa7b&#34;&gt;ReadFrame&lt;/span&gt;()
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; err &lt;span style=&#34;color:#ff79c6&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;nil&lt;/span&gt; {
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; err
+        }
+        frames = &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;append&lt;/span&gt;(frames, frame)
+
+        payloadIdx &lt;span style=&#34;color:#ff79c6&#34;&gt;+=&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;int&lt;/span&gt;(frameLength)
+    }
+
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; payloadIdx &lt;span style=&#34;color:#ff79c6&#34;&gt;!=&lt;/span&gt; payloadLength {
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; fmt.&lt;span style=&#34;color:#50fa7b&#34;&gt;Errorf&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Payload length is not equal with the Frame length mentioned in Frame Header&amp;#34;&lt;/span&gt;)
+    }
+
+    h.BaseLayer = layers.BaseLayer{Contents: data[:&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;len&lt;/span&gt;(data)]}
+    h.frames = frames
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;nil&lt;/span&gt;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;After multiple trials, I found out that &lt;code&gt;http2.Framer&lt;/code&gt; would get stuck if we give a data that&amp;rsquo;s not a valid HTTP/2 frame format (as depicted below). This means we need to find a way to classify whether the bytes of data is a valid frame or not. &lt;a href=&#34;https://httpwg.org/specs/rfc7540.html&#34;&gt;RFC 7540&lt;/a&gt; document doesn&amp;rsquo;t mention any way to classify a HTTP/2 frame, so I came up with a currently working solution by checking:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Is the frame length specified in the frame header the same with the actual payload length?&lt;/li&gt;
+&lt;li&gt;Is the R bit is unset?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;pre&gt;&lt;code class=&#34;language-nil&#34; data-lang=&#34;nil&#34;&gt;
++-----------------------------------------------+
+|                 Length (24)                   |
++---------------+---------------+---------------+
+|   Type (8)    |   Flags (8)   |
++-+-------------+---------------+-------------------------------+
+|R|                 Stream Identifier (31)                      |
++=+=============================================================+
+|                   Frame Payload (0...)                      ...
++---------------------------------------------------------------+
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;After we check the validity of the frame, we want to utilize Go&amp;rsquo;s &lt;code&gt;net/http2&lt;/code&gt; package to decode the frame for us. We do that by creating a new &lt;code&gt;framer&lt;/code&gt; and pass the data to the &lt;code&gt;framer&lt;/code&gt;. Next we call the &lt;code&gt;ReadFrame&lt;/code&gt; function to get the actual HTTP/2 frame.&lt;/p&gt;
+&lt;h3 id=&#34;intercepting-the-frames&#34;&gt;Intercepting the frames&lt;/h3&gt;
+&lt;p&gt;Next, we&amp;rsquo;re going to capture the packet and decode the HTTP/2 frames.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;
+&lt;span style=&#34;color:#ff79c6&#34;&gt;package&lt;/span&gt; main
+
+&lt;span style=&#34;color:#ff79c6&#34;&gt;import&lt;/span&gt; (
+    &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;bytes&amp;#34;&lt;/span&gt;
+    &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;fmt&amp;#34;&lt;/span&gt;
+    &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;log&amp;#34;&lt;/span&gt;
+    &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;time&amp;#34;&lt;/span&gt;
+
+    &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;github.com/google/gopacket&amp;#34;&lt;/span&gt;
+    &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;github.com/google/gopacket/layers&amp;#34;&lt;/span&gt;
+    &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;github.com/google/gopacket/pcap&amp;#34;&lt;/span&gt;
+
+    &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;golang.org/x/net/http2&amp;#34;&lt;/span&gt;
+)
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; (
+    device       &lt;span style=&#34;color:#8be9fd&#34;&gt;string&lt;/span&gt;        = &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;lo0&amp;#34;&lt;/span&gt;
+    snapshot_len &lt;span style=&#34;color:#8be9fd&#34;&gt;int32&lt;/span&gt;         = &lt;span style=&#34;color:#bd93f9&#34;&gt;1024&lt;/span&gt;
+    promiscuous  &lt;span style=&#34;color:#8be9fd&#34;&gt;bool&lt;/span&gt;          = &lt;span style=&#34;color:#ff79c6&#34;&gt;false&lt;/span&gt;
+    timeout      time.Duration = &lt;span style=&#34;color:#bd93f9&#34;&gt;900&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt; time.Millisecond
+    filter       &lt;span style=&#34;color:#8be9fd&#34;&gt;string&lt;/span&gt;        = &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;tcp&amp;#34;&lt;/span&gt;
+)
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;func&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;main&lt;/span&gt;() {
+    &lt;span style=&#34;color:#6272a4&#34;&gt;// Open device: We could also use other options (i.e. Open a .pcap file)
+&lt;/span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;    handle, err &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; pcap.&lt;span style=&#34;color:#50fa7b&#34;&gt;OpenLive&lt;/span&gt;(device, snapshot_len, promiscuous, timeout)
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; err &lt;span style=&#34;color:#ff79c6&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;nil&lt;/span&gt; {
+        log.&lt;span style=&#34;color:#50fa7b&#34;&gt;Fatal&lt;/span&gt;(err)
+    }
+    log.&lt;span style=&#34;color:#50fa7b&#34;&gt;Printf&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Successfully opened live sniffing on %s\n&amp;#34;&lt;/span&gt;, device)
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;defer&lt;/span&gt; handle.&lt;span style=&#34;color:#50fa7b&#34;&gt;Close&lt;/span&gt;()
+
+    &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;var&lt;/span&gt; h2c HTTP2
+
+    &lt;span style=&#34;color:#6272a4&#34;&gt;// Create a parser to decode our HTTP/2 frame
+&lt;/span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;    parser &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; gopacket.&lt;span style=&#34;color:#50fa7b&#34;&gt;NewDecodingLayerParser&lt;/span&gt;(LayerTypeHTTP2, &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;amp;&lt;/span&gt;h2c)
+
+    &lt;span style=&#34;color:#6272a4&#34;&gt;// Use the handle as a packet source to process all packets
+&lt;/span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;    source &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; gopacket.&lt;span style=&#34;color:#50fa7b&#34;&gt;NewPacketSource&lt;/span&gt;(handle, handle.&lt;span style=&#34;color:#50fa7b&#34;&gt;LinkType&lt;/span&gt;())
+    decoded &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; []gopacket.LayerType{}
+
+    &lt;span style=&#34;color:#6272a4&#34;&gt;// Process every packet
+&lt;/span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#ff79c6&#34;&gt;for&lt;/span&gt; packet &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;range&lt;/span&gt; source.&lt;span style=&#34;color:#50fa7b&#34;&gt;Packets&lt;/span&gt;() {
+        ipLayer &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; packet.&lt;span style=&#34;color:#50fa7b&#34;&gt;NetworkLayer&lt;/span&gt;()
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; ipLayer &lt;span style=&#34;color:#ff79c6&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;nil&lt;/span&gt; {
+            log.&lt;span style=&#34;color:#50fa7b&#34;&gt;Println&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;No IP&amp;#34;&lt;/span&gt;)
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;continue&lt;/span&gt;
+        }
+
+        &lt;span style=&#34;color:#6272a4&#34;&gt;// Cast the layer to either IPv4 or IPv6
+&lt;/span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;        ipv4, ipv4Ok &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; ipLayer.(&lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;layers.IPv4)
+        ipv6, ipv6Ok &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; ipLayer.(&lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;layers.IPv6)
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; !ipv4Ok &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; !ipv6Ok {
+            log.&lt;span style=&#34;color:#50fa7b&#34;&gt;Println&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Failed to cast packet to IPv4 or IPv6&amp;#34;&lt;/span&gt;)
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;continue&lt;/span&gt;
+        }
+
+        tcpLayer &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; packet.&lt;span style=&#34;color:#50fa7b&#34;&gt;Layer&lt;/span&gt;(layers.LayerTypeTCP)
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; tcpLayer &lt;span style=&#34;color:#ff79c6&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;nil&lt;/span&gt; {
+            log.&lt;span style=&#34;color:#50fa7b&#34;&gt;Println&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Not a TCP Packet&amp;#34;&lt;/span&gt;)
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;continue&lt;/span&gt;
+        }
+
+        tcp, ok &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; tcpLayer.(&lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;layers.TCP)
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; !ok {
+            log.&lt;span style=&#34;color:#50fa7b&#34;&gt;Println&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Failed to cast packet to TCP&amp;#34;&lt;/span&gt;)
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;continue&lt;/span&gt;
+        }
+
+        appLayer &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; packet.&lt;span style=&#34;color:#50fa7b&#34;&gt;ApplicationLayer&lt;/span&gt;()
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; appLayer &lt;span style=&#34;color:#ff79c6&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;nil&lt;/span&gt; {
+            log.&lt;span style=&#34;color:#50fa7b&#34;&gt;Println&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;No ApplicationLayer payload&amp;#34;&lt;/span&gt;)
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;continue&lt;/span&gt;
+        }
+
+        packetData &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; appLayer.&lt;span style=&#34;color:#50fa7b&#34;&gt;Payload&lt;/span&gt;()
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; err &lt;span style=&#34;color:#ff79c6&#34;&gt;:=&lt;/span&gt; parser.&lt;span style=&#34;color:#50fa7b&#34;&gt;DecodeLayers&lt;/span&gt;(packetData, &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;amp;&lt;/span&gt;decoded); err &lt;span style=&#34;color:#ff79c6&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;nil&lt;/span&gt; {
+            fmt.&lt;span style=&#34;color:#50fa7b&#34;&gt;Printf&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Could not decode layers: %v\n&amp;#34;&lt;/span&gt;, err)
+            &lt;span style=&#34;color:#ff79c6&#34;&gt;continue&lt;/span&gt;
+        }
+
+        fmt.&lt;span style=&#34;color:#50fa7b&#34;&gt;Println&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;*****************************************************&amp;#34;&lt;/span&gt;)
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; ipv4Ok {
+            fmt.&lt;span style=&#34;color:#50fa7b&#34;&gt;Println&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;IPv4 SrcIP:        &amp;#34;&lt;/span&gt;, ipv4.SrcIP)
+            fmt.&lt;span style=&#34;color:#50fa7b&#34;&gt;Println&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;IPv4 DstIP:        &amp;#34;&lt;/span&gt;, ipv4.DstIP)
+        } &lt;span style=&#34;color:#ff79c6&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; ipv6Ok {
+            fmt.&lt;span style=&#34;color:#50fa7b&#34;&gt;Println&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;IPv6 SrcIP:        &amp;#34;&lt;/span&gt;, ipv6.SrcIP)
+            fmt.&lt;span style=&#34;color:#50fa7b&#34;&gt;Println&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;IPv6 DstIP:        &amp;#34;&lt;/span&gt;, ipv6.DstIP)
+        }
+        fmt.&lt;span style=&#34;color:#50fa7b&#34;&gt;Println&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;TCP srcPort:       &amp;#34;&lt;/span&gt;, tcp.SrcPort)
+        fmt.&lt;span style=&#34;color:#50fa7b&#34;&gt;Println&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;TCP dstPort:       &amp;#34;&lt;/span&gt;, tcp.DstPort)
+        fmt.&lt;span style=&#34;color:#50fa7b&#34;&gt;Println&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;HTTP/2:            &amp;#34;&lt;/span&gt;, h2c.frame)
+        fmt.&lt;span style=&#34;color:#50fa7b&#34;&gt;Println&lt;/span&gt;(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;*****************************************************&amp;#34;&lt;/span&gt;)
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;Using Go&amp;rsquo;s native HTTP support and Gopacket, we could build a packet interception program for HTTP/2. For further HTTP/2 header processing, we could also use &lt;code&gt;net/http2/hpack&lt;/code&gt; package to do the HPACK decoding and encoding.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>WWDC19: Best Dub-Dub ever!</title>
+      <link>http://abrampers.com/blog/wwdc19-best-dub-dub-ever/</link>
+      <pubDate>Mon, 24 Jun 2019 17:55:00 +0700</pubDate>
+      
+      <guid>http://abrampers.com/blog/wwdc19-best-dub-dub-ever/</guid>
+      <description>&lt;!-- raw HTML omitted --&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#what-is-wwdc&#34;&gt;What is WWDC?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#wwdc-scholarship&#34;&gt;WWDC Scholarship?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#wwdc19&#34;&gt;WWDC19&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#lesson-learned&#34;&gt;Lesson learned&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#final-thoughts&#34;&gt;Final thoughts&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;This year, I’m very lucky to be one of the WWDC19 Scholarship Winner from Indonesia to attend Apple’s event of the year. It’s obviously the best Dub-Dub ever since it’s my first time here! Dub-Dub 19 is an event packed with awesome things and I’m going to tell my story from the complete beginning. Here we go!&lt;/p&gt;
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/6048/1*mMUmHriJt0p8Y2Z46gBZGw.jpeg&#34;
+         alt=&#34;Figure 1: HMIF ITB @ WWDC19 (Nicho, Abram, and Faza)&#34;/&gt; &lt;figcaption&gt;
+            &lt;p&gt;Figure 1: HMIF ITB @ WWDC19 (Nicho, Abram, and Faza)&lt;/p&gt;
+        &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;h2 id=&#34;what-is-wwdc&#34;&gt;What is WWDC?&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The Apple Worldwide Developers Conference (WWDC, also known as Dub Dub) is a conference held annually by Apple Inc. in San Jose, California. Apple uses the event to showcase its new software and technologies for software developers. Attendees can participate in hands-on labs with Apple engineers and attend in-depth sessions covering a wide variety of topics. — Wikipedia&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Enough from Wikipedia, for me, WWDC is an event where developers gather and obtain plenty of insights from Apple about their software. Even better, it’s an event where students (or recently graduated High School students) can apply and actually receive the scholarship to go to this event without spending a single penny.&lt;/p&gt;
+&lt;h2 id=&#34;wwdc-scholarship&#34;&gt;WWDC Scholarship?&lt;/h2&gt;
+&lt;p&gt;The &lt;strong&gt;&lt;strong&gt;scholarship&lt;/strong&gt;&lt;/strong&gt; term here means that Apple will get you the WWDC ticket for &lt;strong&gt;&lt;strong&gt;free&lt;/strong&gt;&lt;/strong&gt;. I repeat, &lt;strong&gt;&lt;strong&gt;for free&lt;/strong&gt;&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;To submit, we have to create a Swift Playground that can be experienced in 3 minutes in iPad’s Swift Playgrounds or Xcode’s Playground. After submission, application will be judged based on:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Technical accomplishment&lt;/li&gt;
+&lt;li&gt;Creativity of ideas&lt;/li&gt;
+&lt;li&gt;Content of written response&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;application&#34;&gt;Application&lt;/h3&gt;
+&lt;p&gt;On a beautiful morning on Thursday, March 15, 2019 Apple announced that they had opened WWDC Scholarship Submission and that all submissions are meant to be submitted before Sunday, March 24, 2019 at 5.00 PM PDT. Wow, 7 days to work on the submission? &lt;strong&gt;&lt;strong&gt;Challenge accepted&lt;/strong&gt;&lt;/strong&gt;! I was quite surprised because they only gave us 7 days to work on the submission while previously the submission was up to two weeks long.&lt;/p&gt;
+&lt;p&gt;At first, I had an idea to create a real-time style transfer application in Swift Playground using UIKit, CoreML and probably camera for the real-time transfer, but after 5 days of working on it, the CoreML model decided to not cooperate. It always gave an error without any description. Frustrating.&lt;/p&gt;
+&lt;p&gt;This problem forced me to find something outstanding that works and was good enough to distinct me from other applicants. And some &lt;strong&gt;Metal&lt;/strong&gt; struck my mind. “Why don’t I try to use &lt;a href=&#34;https://developer.apple.com/metal/&#34;&gt;Metal&lt;/a&gt; just like how I used OpenGL for my Computer Graphics assignment?” And after 2 sleepless nights, I did just that.&lt;/p&gt;
+&lt;p&gt;I’ve created a simple introduction to &lt;strong&gt;Metal&lt;/strong&gt; using MetalKit named &lt;strong&gt;Metalify&lt;/strong&gt;. Here&amp;rsquo;s the &lt;a href=&#34;https://github.com/abrampers/WWDC19-Submission&#34;&gt;playground&lt;/a&gt; if you&amp;rsquo;d like to try it on your own.&lt;/p&gt;
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/2544/1*O64rdYG16VbLC7NK%5FcnA9g.png&#34;
+         alt=&#34;Figure 2: Scholarship email!&#34;/&gt; &lt;figcaption&gt;
+            &lt;p&gt;Figure 2: Scholarship email!&lt;/p&gt;
+        &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;On another beautiful morning — Monday, April 15, 2019 — I received this email and my heart stopped for a second. Man! I got this. I was one of 350 students worldwide that got the scholarship. That was the best day of my college life yet 🤖.&lt;/p&gt;
+&lt;p&gt;As a scholarship winner, they told me that we would get free WWDC ticket, free lodging on the San Jose State University dorm, and free breakfast and lunch meal.&lt;/p&gt;
+&lt;h2 id=&#34;wwdc19&#34;&gt;WWDC19&lt;/h2&gt;
+&lt;h3 id=&#34;swag&#34;&gt;Swag&lt;/h3&gt;
+&lt;p&gt;Fast forward to the Dub Dub week, we got to check in at the convention center and received some Dub Dub Swag for us to wear for the rest of the week. We got a reversible bomber jacket, a Scholarship Winner T-Shirt, and a few random pins including Indonesian Flag’s pin.&lt;/p&gt;
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/6048/1*7sfvKXgFy2aoxf9QTMHpKQ.jpeg&#34;
+         alt=&#34;Figure 3: Bomber jacket &amp;#43; small Tim Cook pin&#34;/&gt; &lt;figcaption&gt;
+            &lt;p&gt;Figure 3: Bomber jacket + small Tim Cook pin&lt;/p&gt;
+        &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;h3 id=&#34;scholarship-kickoff&#34;&gt;Scholarship kickoff&lt;/h3&gt;
+&lt;p&gt;After checking in, all the scholarship winner were scheduled to attend scholarship kickoff where Esther Hare &lt;a href=&#34;https://twitter.com/eehare?lang=en&#34;&gt;@EEhare&lt;/a&gt; was there to give a little talk. She encouraged us to talk to as many people as we can, whether it’s fellow scholars, developers, or even Apple engineers. And the coolest thing here is that there were plenty of Apple engineers standing by for us to talk to. I was very excited since I never had any chance to get to meet, better yet, talk to the engineers that build Apple. Besides, there were plenty of food trucks and drinks all over the place..&lt;/p&gt;
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/12000/1*Vu7eITgS5sivMkDNtPuOPw.jpeg&#34;/&gt; 
+&lt;/figure&gt;
+
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/2250/1*ogZQRMEFWxEP8y9bQvQ2jw.jpeg&#34;
+         alt=&#34;Figure 4: Beautiful weather @ Discovery Meadow with Indonesian scholarship winners&#34;/&gt; &lt;figcaption&gt;
+            &lt;p&gt;Figure 4: Beautiful weather @ Discovery Meadow with Indonesian scholarship winners&lt;/p&gt;
+        &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;After the kickoff, a few of Indonesian scholars gather around and did a vlog about the Dub Dub. Here we go!&lt;/p&gt;
+
+&lt;div style=&#34;position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;&#34;&gt;
+  &lt;iframe src=&#34;https://www.youtube.com/embed/Ry0ezsPNt6I&#34; style=&#34;position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;&#34; allowfullscreen title=&#34;YouTube Video&#34;&gt;&lt;/iframe&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&#34;keynote&#34;&gt;Keynote&lt;/h3&gt;
+&lt;p&gt;The long awaited keynote was there and many people called this ‘the most packed WWDC Keynote ever’. This includes the announcement of the brand new Mac Pro, iPad OS, iOS 13, macOS Catalina and the SwiftUI &amp;amp; Combine which were the star for the rest of the week.&lt;/p&gt;
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/3264/1*7IDRGBs7cyfjNYCb4eQ9Sg.jpeg&#34;/&gt; 
+&lt;/figure&gt;
+
+&lt;p&gt;The most exciting part of the Keynote was the announcement of SwiftUI. There, Craig Federighi showed how &lt;a href=&#34;https://developer.apple.com/documentation/swiftui&#34;&gt;SwiftUI&lt;/a&gt;, with its declarative traits + &lt;a href=&#34;https://developer.apple.com/documentation/combine&#34;&gt;Combine&lt;/a&gt; (Apple’s framework for Async programming) made multi-platform development seems so easy and fluid.&lt;/p&gt;
+&lt;p&gt;Project Catalyst had also brought huge possibilities since it enables developer to bring iPad Apps (built using UIKit) to run in Mac (typically built using AppKit). iPads can now be used as a *sidecar *to Mac. These two features will bring iPads closer to Macs and vice versa.&lt;/p&gt;
+&lt;h3 id=&#34;scholarship-lounge&#34;&gt;Scholarship Lounge&lt;/h3&gt;
+&lt;p&gt;Scholars were given the privilege to chill and have a chit chat with fellow scholars throughout the week at the scholarship lounge. Here, we were given a wired 10MBps connection to try all the Betas they announced.&lt;/p&gt;
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/11228/1*HgGxRO1iodwpL36HH254nA.jpeg&#34;
+         alt=&#34;Figure 5: Scholarship lounge: Our home&#34;/&gt; &lt;figcaption&gt;
+            &lt;p&gt;Figure 5: Scholarship lounge: Our home&lt;/p&gt;
+        &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;h3 id=&#34;pro-studio&#34;&gt;Pro studio&lt;/h3&gt;
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*kmCk6hBke2b9lhluc6R04g.jpeg&#34;
+         alt=&#34;Figure 6: The recently announced Mac Pro&#34;/&gt; &lt;figcaption&gt;
+            &lt;p&gt;Figure 6: The recently announced Mac Pro&lt;/p&gt;
+        &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;All the Dub Dub attendee got the chance to visit the Pro Studio across the Convention Center to see the newly announced Mac Pro in action. In this building, they showcased a few workflows dome with the Mac Pro. Photo editing workflow, real-time 8K raw video rendering, creating music orchestra, and 3D Editing. Having seen all these things and as someone who didn’t really understand it, Mac Pro seemed like a real deal.&lt;/p&gt;
+&lt;h3 id=&#34;sessions-and-labs&#34;&gt;Sessions and Labs&lt;/h3&gt;
+&lt;p&gt;For the rest of the week, there were plenty of sessions and labs conducted all over the Convention Center. Sessions are more like seminars conducted by Apple where they showcase best practices, reveal new features in more detail, and give a bit of demo. Labs are the place to go if you have a bug, question, or a feature request and give it right to the engineers that work on that particular feature. Awesome! We could actually ask the person who was in charge of the product. What a way to solve a bug.&lt;/p&gt;
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*ZsvETrvysoT60qinnSB5yw.jpeg&#34;/&gt; 
+&lt;/figure&gt;
+
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*G0I23P7UxXG8%5FcbAa94LIA.jpeg&#34;/&gt; 
+&lt;/figure&gt;
+
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/2000/1*lT-EgnL2S5TZziXPU5-j9w.jpeg&#34;/&gt; 
+&lt;/figure&gt;
+
+&lt;h3 id=&#34;games-sporting-events-and-wwdc-bash&#34;&gt;Games, Sporting Events, and WWDC Bash!&lt;/h3&gt;
+&lt;p&gt;The sport activities was the High Intensity Interval Training by Aaptiv, WWDC 5K Run, and Yoga with Glo. They provided all the equipment for the training and let us have all the equipment. Note: They kinda gave us a $100 yoga mat LOL!&lt;/p&gt;
+&lt;p&gt;Throughout the week they conducted an AR game called SwiftStrike. It is a bowling game where the player had to hit down the opponent’s pin. At the end of the week, they conducted the SwiftStrike Championship and the funny thing is both the winner and the runner up are Indonesian 🇮🇩.&lt;/p&gt;
+&lt;p&gt;On the last night, Apple also invited the Weezers to the WWDC Bash (some kind of get-together concert) where we can chill out, enjoy the concert, and play games!&lt;/p&gt;
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/2250/1*AiXv107iWKkFjHNFwlXAFQ.jpeg&#34;/&gt; 
+&lt;/figure&gt;
+
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/2250/1*a3GP1NeLhRs4ZSV0wcYW9Q.jpeg&#34;/&gt; 
+&lt;/figure&gt;
+
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/2000/1*-YJKq5HbYbGyURfclQbyBw.jpeg&#34;
+         alt=&#34;Figure 7: HIIT Morning Workout, SwiftStrike, and WWDC19 Bash!&#34;/&gt; &lt;figcaption&gt;
+            &lt;p&gt;Figure 7: HIIT Morning Workout, SwiftStrike, and WWDC19 Bash!&lt;/p&gt;
+        &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;h2 id=&#34;lesson-learned&#34;&gt;Lesson learned&lt;/h2&gt;
+&lt;p&gt;Meeting all those people in Dub Dub opened my mind about how I look at myself. Never think that we’re the smartest person in the room. I actually met the person that made the La Liga iOS App and all of these things pushed me to keep striving for greatness.&lt;/p&gt;
+&lt;p&gt;Second thing, as a developer we tend to focus on highly technical things. Here, I realized that the ability to communicate with other people is essential for a developer’s success. Trying to share and communicate what we have in mind will help us a lot in our everyday life.&lt;/p&gt;
+&lt;p&gt;The third and final thing is to never, ever underestimate a person, stay humble and respect everyone.&lt;/p&gt;
+&lt;h2 id=&#34;final-thoughts&#34;&gt;Final thoughts&lt;/h2&gt;
+&lt;p&gt;After all, WWDC is a networking opportunity for many people. We can always see the sessions online, but the chance to speak with random people when queueing for the line is special. We never know what a short conversation with some random guy at Dub Dub can bring us.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Pro tip&lt;/strong&gt;: Bring your business card and talk to as many people as you can @ WWDC&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*d2QcqQotYDs202ALyQAdqg.jpeg&#34;/&gt; 
+&lt;/figure&gt;
+
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*vX4kZveZpYSZ4W9krHvhFw.jpeg&#34;/&gt; 
+&lt;/figure&gt;
+
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*jr4w2Xikvy-La1rBAEWq2g.jpeg&#34;/&gt; 
+&lt;/figure&gt;
+
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*Jo4PpChs5Mev8yYoKoAQng.jpeg&#34;
+         alt=&#34;Figure 8: Don&amp;amp;rsquo;t be shy and make new friends @ WWDC&#34;/&gt; &lt;figcaption&gt;
+            &lt;p&gt;Figure 8: Don&amp;rsquo;t be shy and make new friends @ WWDC&lt;/p&gt;
+        &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;This article can’t 100% express how I felt before and after WWDC, but I hope this will inspire many people to find their way to WWDC.&lt;/p&gt;
+&lt;p&gt;Hope to see more of Indonesians (especially &lt;strong&gt;&lt;strong&gt;HMIF ITB&lt;/strong&gt;&lt;/strong&gt;) @ Dub Dub 2020!&lt;/p&gt;
+&lt;h3 id=&#34;links&#34;&gt;Links&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/abrampers/WWDC19-Submission&#34;&gt;My WWDC19 Submission&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=Ry0ezsPNt6I&#34;&gt;YouTube video&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;references&#34;&gt;References&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Pictures by &lt;a href=&#34;https://twitter.com/SwapnanilDhol&#34;&gt;@SwapnanilDhol&lt;/a&gt; and Apple&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
