@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Tags on abrampers.com</title>
-    <link>http://abrampers.com/tags/</link>
-    <description>abrampers.com (Tags)</description>
+    <title>Tags on abram.id</title>
+    <link>https://abram.id/tags/</link>
+    <description>abram.id (Tags)</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 24 Jun 2019 17:55:00 +0700</lastBuildDate>
     
-    <atom:link href="http://abrampers.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://abram.id/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
   </channel>
