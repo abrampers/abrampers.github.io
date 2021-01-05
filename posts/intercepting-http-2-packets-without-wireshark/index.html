@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+
+
+<html lang="en-us" data-theme="">
+<head>
+    
+        
+<meta charset="utf-8">
+<meta name="HandheldFriendly" content="True">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer-when-downgrade">
+
+<title>Intercepting HTTP/2 Packets without Wireshark - abram.id</title>
+<meta name="description" content="">
+
+<link rel="icon" type="image/x-icon" href="https://abram.id/favicon.ico">
+<link rel="apple-touch-icon-precomposed" href="https://abram.id/favicon.png">
+
+
+
+    
+
+
+
+
+
+    
+    
+    
+
+    
+        <link rel="stylesheet" href="https://abram.id/css/style.bf67952500c522fa4be2b487513979e2a6f82a03826f34db9e4592670b2a1c3b.css" integrity="sha256-v2eVJQDFIvpL4rSHUTl54qb4KgOCbzTbnkWSZwsqHDs=">
+    
+
+
+
+
+
+    
+
+
+
+
+
+    
+    
+    
+
+    
+        <link rel="stylesheet" href="https://abram.id/css/style.b9b83862c8dccf2c4b1642c9fba82e8360729a7f4bc26116d01745dcc3bb8b82.css" integrity="sha256-ubg4YsjczyxLFkLJ&#43;6gug2Bymn9LwmEW0BdF3MO7i4I=">
+    
+
+
+
+
+
+<meta property="og:title" content="Intercepting HTTP/2 Packets without Wireshark" />
+<meta property="og:description" content="HTTP/2, what is it? Intercepting the actual packets Conclusion  HTTP/2, what is it? I never knew HTTP/2 until I bumped into gRPC, which uses HTTP/2 as its Layer 7 protocol. At first, it seems that HTTP/2 is just like another update of the commonly used HTTP/1.1. Yet HTTP/2 is a new HTTP protocol designed to deal with the limitations of HTTP/1.1.
+For a bit of context, HTTP/1.1 had plenty of latency and inefficiency issues that made the performance of common internet webpage (that relies heavily on HTTP protocols) extremely hard to optimize." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://abram.id/posts/intercepting-http-2-packets-without-wireshark/" />
+<meta property="article:published_time" content="2020-03-12T23:19:00+07:00" />
+<meta property="article:modified_time" content="2020-03-12T23:19:00+07:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Intercepting HTTP/2 Packets without Wireshark"/>
+<meta name="twitter:description" content="HTTP/2, what is it? Intercepting the actual packets Conclusion  HTTP/2, what is it? I never knew HTTP/2 until I bumped into gRPC, which uses HTTP/2 as its Layer 7 protocol. At first, it seems that HTTP/2 is just like another update of the commonly used HTTP/1.1. Yet HTTP/2 is a new HTTP protocol designed to deal with the limitations of HTTP/1.1.
+For a bit of context, HTTP/1.1 had plenty of latency and inefficiency issues that made the performance of common internet webpage (that relies heavily on HTTP protocols) extremely hard to optimize."/>
+
+
+
+
+
+
+
+
+
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to main content</a>
+    <div class="container">
+        <header class="common-header"> 
+            
+                <h1 class="site-title">
+    <a href="/">abram.id</a>
+</h1>
+
+    <nav>
+        
+        
+        <a class="" href="https://abram.id/about/" title="About">About</a>
+        
+        <a class="" href="https://abram.id/tags/" title="Tags">Tags</a>
+        
+        <a class="" href="https://abram.id/posts/" title="Archive">Archive</a>
+        
+    </nav>
+
+
+            
+        </header>
+        <main id="main" tabindex="-1"> 
+            
+    
+    
+    <article class="post">
+        <header class="post-header">
+            <h1 class="post-title">Intercepting HTTP/2 Packets without Wireshark</h1>
+        </header>
+        <div class="content">
+            <!-- raw HTML omitted -->
+<ul>
+<li><a href="#http-2-what-is-it">HTTP/2, what is it?</a></li>
+<li><a href="#intercepting-the-actual-packets">Intercepting the actual packets</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+</ul>
+<!-- raw HTML omitted -->
+<h2 id="http-2-what-is-it">HTTP/2, what is it?</h2>
+<p>I never knew HTTP/2 until I bumped into gRPC, which uses HTTP/2 as its Layer 7 protocol. At first, it seems that HTTP/2 is just like another update of the commonly used HTTP/1.1. Yet HTTP/2 is a new HTTP protocol designed to deal with the limitations of HTTP/1.1.</p>
+<p>For a bit of context, HTTP/1.1 had plenty of latency and inefficiency issues that made the performance of common internet webpage (that relies heavily on HTTP protocols) extremely hard to optimize. The first time we open a web page, it usually requires requesting a dozen resources from stylesheets, images, JavaScript codes, and other API calls. HTTP/1.1 does this by creating an equal number of TCP connection to get the resources in a parallel fashion. This means when the server is processing and preparing the response, the TCP connection is doing nothing but waiting for the server to give the response. This is very inefficient considering every single TCP connection made is doing nothing for some time. Plus there is always a cost when opening a TCP connection and closing it. So it is very inefficient to use one TCP connection per HTTP request.</p>
+<p>HTTP/2 was made to solve some of the problems by enabling TCP to be multiplexed for multiple HTTP requests. So with HTTP/2, we will be opening less number of TCP connections compared to HTTP/1.1. HTTP/2 also enables a TCP connection to be reused for multiple request, no more one TCP connection per HTTP request. These two features will improve the utilization of the TCP connection.</p>
+<p>Another main difference of HTTP/2 and HTTP/1.1 is that HTTP/2 is binary, while HTTP/1.1 is textual. On one hand, this gives us the benefit of speed since computers are good with binaries. Yet on the other hand, it is more difficult to debug since humans are not very good with binaries. To add on, what&rsquo;s more interesting is even the HTTP/2 headers are compressed for performance reasons. These two features increase the complexity to intercept and process HTTP/2 packets from the previous HTTP/1.1 where we could just read the whole payload text.</p>
+<p>Aside from features mentioned above, there are plenty of other features of HTTP/2 you can read in the <a href="https://httpwg.org/specs/rfc7540.html">RFC 7540</a> document.</p>
+<h2 id="intercepting-the-actual-packets">Intercepting the actual packets</h2>
+<p>At this time of writing, I haven&rsquo;t found any way to intercept and decode HTTP/2 packet other than <a href="https://www.wireshark.org">Wireshark</a>. Wireshark is obviously a great tool for network analysis, but at other times, we want to intercept and process the packet built in right onto our applications. In this use case, Wireshark is not a suitable option, so we need to integrate HTTP/2 into existing packet interception library.</p>
+<p>To intercept the packets, I will be using Go with Google&rsquo;s <a href="https://github.com/google/gopacket">gopacket</a>. This stack is my go to choice because Go have the first class support for HTTP and HTTP2 and Gopacket itself is fairly extensible.</p>
+<p>From here onwards we&rsquo;ll use the term &ldquo;frame&rdquo; to represent the unit of transfer of an HTTP/2 traffic.</p>
+<h3 id="implementing-the-layers">Implementing the layers</h3>
+<p>Since Gopacket doesn&rsquo;t support HTTP/2 as its application layer, we need to tell Gopacket about the structure of HTTP/2 frame using the code below.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go">
+<span style="color:#6272a4">// Create a layer type and give it a name and a decoder to use.
+</span><span style="color:#6272a4"></span><span style="color:#8be9fd;font-style:italic">var</span> LayerTypeHTTP2 = gopacket.<span style="color:#50fa7b">RegisterLayerType</span>(<span style="color:#bd93f9">12345</span>, gopacket.LayerTypeMetadata{Name: <span style="color:#f1fa8c">&#34;HTTP2&#34;</span>, Decoder: gopacket.<span style="color:#50fa7b">DecodeFunc</span>(decodeHTTP2)})
+
+<span style="color:#8be9fd;font-style:italic">type</span> HTTP2 <span style="color:#8be9fd;font-style:italic">struct</span> {
+    layers.BaseLayer
+
+    frames []http2.Frame
+}
+
+<span style="color:#6272a4">// Implement layer&#39;s metadata
+</span><span style="color:#6272a4"></span><span style="color:#8be9fd;font-style:italic">func</span> (h HTTP2) <span style="color:#50fa7b">LayerType</span>() gopacket.LayerType      { <span style="color:#ff79c6">return</span> LayerTypeHTTP2 }
+<span style="color:#8be9fd;font-style:italic">func</span> (h <span style="color:#ff79c6">*</span>HTTP2) <span style="color:#50fa7b">Payload</span>() []<span style="color:#8be9fd">byte</span>                   { <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span> }
+<span style="color:#8be9fd;font-style:italic">func</span> (h <span style="color:#ff79c6">*</span>HTTP2) <span style="color:#50fa7b">CanDecode</span>() gopacket.LayerClass    { <span style="color:#ff79c6">return</span> LayerTypeHTTP2 }
+<span style="color:#8be9fd;font-style:italic">func</span> (h <span style="color:#ff79c6">*</span>HTTP2) <span style="color:#50fa7b">NextLayerType</span>() gopacket.LayerType { <span style="color:#ff79c6">return</span> gopacket.LayerTypeZero }
+
+<span style="color:#6272a4">// Implement the decoder function to be used
+</span><span style="color:#6272a4"></span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">decodeHTTP2</span>(data []<span style="color:#8be9fd">byte</span>, p gopacket.PacketBuilder) <span style="color:#8be9fd">error</span> {
+    h <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>HTTP2{}
+    err <span style="color:#ff79c6">:=</span> h.<span style="color:#50fa7b">DecodeFromBytes</span>(data, p)
+    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+        <span style="color:#ff79c6">return</span> err
+    }
+    p.<span style="color:#50fa7b">AddLayer</span>(h)
+    p.<span style="color:#50fa7b">SetApplicationLayer</span>(h)
+    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+}
+
+<span style="color:#8be9fd;font-style:italic">func</span> (h <span style="color:#ff79c6">*</span>HTTP2) <span style="color:#50fa7b">Frames</span>() []http2.Frame {
+    <span style="color:#ff79c6">return</span> h.frames
+}
+
+<span style="color:#8be9fd;font-style:italic">func</span> (h <span style="color:#ff79c6">*</span>HTTP2) <span style="color:#50fa7b">DecodeFromBytes</span>(data []<span style="color:#8be9fd">byte</span>, df gopacket.DecodeFeedback) <span style="color:#8be9fd">error</span> {
+    <span style="color:#8be9fd;font-style:italic">var</span> frames []http2.Frame
+    frameHeaderLength <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">uint32</span>(<span style="color:#bd93f9">9</span>)
+    payloadLength <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">len</span>(data)
+
+    payloadIdx <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>
+    <span style="color:#ff79c6">for</span> payloadIdx &lt; payloadLength {
+        <span style="color:#ff79c6">if</span> payloadIdx<span style="color:#ff79c6">+</span><span style="color:#8be9fd;font-style:italic">int</span>(frameHeaderLength) &gt; payloadLength {
+            <span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Payload length couldn&#39;t contain Frame Headers&#34;</span>)
+        }
+
+        framePayloadLength <span style="color:#ff79c6">:=</span> (<span style="color:#8be9fd;font-style:italic">uint32</span>(data[payloadIdx<span style="color:#ff79c6">+</span><span style="color:#bd93f9">0</span>])<span style="color:#ff79c6">&lt;&lt;</span><span style="color:#bd93f9">16</span> | <span style="color:#8be9fd;font-style:italic">uint32</span>(data[payloadIdx<span style="color:#ff79c6">+</span><span style="color:#bd93f9">1</span>])<span style="color:#ff79c6">&lt;&lt;</span><span style="color:#bd93f9">8</span> | <span style="color:#8be9fd;font-style:italic">uint32</span>(data[payloadIdx<span style="color:#ff79c6">+</span><span style="color:#bd93f9">2</span>]))
+        frameLength <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">int</span>(frameHeaderLength <span style="color:#ff79c6">+</span> framePayloadLength)
+
+        rBit <span style="color:#ff79c6">:=</span> data[payloadIdx<span style="color:#ff79c6">+</span><span style="color:#bd93f9">5</span>] <span style="color:#ff79c6">&gt;&gt;</span> <span style="color:#bd93f9">7</span>
+
+        <span style="color:#ff79c6">if</span> rBit <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">0</span> {
+            <span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;R bit is not unset&#34;</span>)
+        }
+
+        <span style="color:#ff79c6">if</span> payloadIdx<span style="color:#ff79c6">+</span>frameLength &gt; payloadLength {
+            <span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Payload length couldn&#39;t contain Payload with the length mentioned in Frame Header&#34;</span>)
+        }
+
+        <span style="color:#8be9fd;font-style:italic">var</span> framerOutput bytes.Buffer
+        r <span style="color:#ff79c6">:=</span> bytes.<span style="color:#50fa7b">NewReader</span>(data[payloadIdx : payloadIdx<span style="color:#ff79c6">+</span>frameLength])
+        framer <span style="color:#ff79c6">:=</span> http2.<span style="color:#50fa7b">NewFramer</span>(<span style="color:#ff79c6">&amp;</span>framerOutput, r)
+
+        frame, err <span style="color:#ff79c6">:=</span> framer.<span style="color:#50fa7b">ReadFrame</span>()
+        <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+            <span style="color:#ff79c6">return</span> err
+        }
+        frames = <span style="color:#8be9fd;font-style:italic">append</span>(frames, frame)
+
+        payloadIdx <span style="color:#ff79c6">+=</span> <span style="color:#8be9fd;font-style:italic">int</span>(frameLength)
+    }
+
+    <span style="color:#ff79c6">if</span> payloadIdx <span style="color:#ff79c6">!=</span> payloadLength {
+        <span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Payload length is not equal with the Frame length mentioned in Frame Header&#34;</span>)
+    }
+
+    h.BaseLayer = layers.BaseLayer{Contents: data[:<span style="color:#8be9fd;font-style:italic">len</span>(data)]}
+    h.frames = frames
+    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+}
+</code></pre></div><p>After multiple trials, I found out that <code>http2.Framer</code> would get stuck if we give a data that&rsquo;s not a valid HTTP/2 frame format (as depicted below). This means we need to find a way to classify whether the bytes of data is a valid frame or not. <a href="https://httpwg.org/specs/rfc7540.html">RFC 7540</a> document doesn&rsquo;t mention any way to classify a HTTP/2 frame, so I came up with a currently working solution by checking:</p>
+<ul>
+<li>Is the frame length specified in the frame header the same with the actual payload length?</li>
+<li>Is the R bit is unset?</li>
+</ul>
+<!-- raw HTML omitted -->
+<pre><code class="language-nil" data-lang="nil">
++-----------------------------------------------+
+|                 Length (24)                   |
++---------------+---------------+---------------+
+|   Type (8)    |   Flags (8)   |
++-+-------------+---------------+-------------------------------+
+|R|                 Stream Identifier (31)                      |
++=+=============================================================+
+|                   Frame Payload (0...)                      ...
++---------------------------------------------------------------+
+</code></pre><p>After we check the validity of the frame, we want to utilize Go&rsquo;s <code>net/http2</code> package to decode the frame for us. We do that by creating a new <code>framer</code> and pass the data to the <code>framer</code>. Next we call the <code>ReadFrame</code> function to get the actual HTTP/2 frame.</p>
+<h3 id="intercepting-the-frames">Intercepting the frames</h3>
+<p>Next, we&rsquo;re going to capture the packet and decode the HTTP/2 frames.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go">
+<span style="color:#ff79c6">package</span> main
+
+<span style="color:#ff79c6">import</span> (
+    <span style="color:#f1fa8c">&#34;bytes&#34;</span>
+    <span style="color:#f1fa8c">&#34;fmt&#34;</span>
+    <span style="color:#f1fa8c">&#34;log&#34;</span>
+    <span style="color:#f1fa8c">&#34;time&#34;</span>
+
+    <span style="color:#f1fa8c">&#34;github.com/google/gopacket&#34;</span>
+    <span style="color:#f1fa8c">&#34;github.com/google/gopacket/layers&#34;</span>
+    <span style="color:#f1fa8c">&#34;github.com/google/gopacket/pcap&#34;</span>
+
+    <span style="color:#f1fa8c">&#34;golang.org/x/net/http2&#34;</span>
+)
+
+<span style="color:#8be9fd;font-style:italic">var</span> (
+    device       <span style="color:#8be9fd">string</span>        = <span style="color:#f1fa8c">&#34;lo0&#34;</span>
+    snapshot_len <span style="color:#8be9fd">int32</span>         = <span style="color:#bd93f9">1024</span>
+    promiscuous  <span style="color:#8be9fd">bool</span>          = <span style="color:#ff79c6">false</span>
+    timeout      time.Duration = <span style="color:#bd93f9">900</span> <span style="color:#ff79c6">*</span> time.Millisecond
+    filter       <span style="color:#8be9fd">string</span>        = <span style="color:#f1fa8c">&#34;tcp&#34;</span>
+)
+
+<span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+    <span style="color:#6272a4">// Open device: We could also use other options (i.e. Open a .pcap file)
+</span><span style="color:#6272a4"></span>    handle, err <span style="color:#ff79c6">:=</span> pcap.<span style="color:#50fa7b">OpenLive</span>(device, snapshot_len, promiscuous, timeout)
+    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+        log.<span style="color:#50fa7b">Fatal</span>(err)
+    }
+    log.<span style="color:#50fa7b">Printf</span>(<span style="color:#f1fa8c">&#34;Successfully opened live sniffing on %s\n&#34;</span>, device)
+    <span style="color:#ff79c6">defer</span> handle.<span style="color:#50fa7b">Close</span>()
+
+    <span style="color:#8be9fd;font-style:italic">var</span> h2c HTTP2
+
+    <span style="color:#6272a4">// Create a parser to decode our HTTP/2 frame
+</span><span style="color:#6272a4"></span>    parser <span style="color:#ff79c6">:=</span> gopacket.<span style="color:#50fa7b">NewDecodingLayerParser</span>(LayerTypeHTTP2, <span style="color:#ff79c6">&amp;</span>h2c)
+
+    <span style="color:#6272a4">// Use the handle as a packet source to process all packets
+</span><span style="color:#6272a4"></span>    source <span style="color:#ff79c6">:=</span> gopacket.<span style="color:#50fa7b">NewPacketSource</span>(handle, handle.<span style="color:#50fa7b">LinkType</span>())
+    decoded <span style="color:#ff79c6">:=</span> []gopacket.LayerType{}
+
+    <span style="color:#6272a4">// Process every packet
+</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">for</span> packet <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> source.<span style="color:#50fa7b">Packets</span>() {
+        ipLayer <span style="color:#ff79c6">:=</span> packet.<span style="color:#50fa7b">NetworkLayer</span>()
+        <span style="color:#ff79c6">if</span> ipLayer <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
+            log.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;No IP&#34;</span>)
+            <span style="color:#ff79c6">continue</span>
+        }
+
+        <span style="color:#6272a4">// Cast the layer to either IPv4 or IPv6
+</span><span style="color:#6272a4"></span>        ipv4, ipv4Ok <span style="color:#ff79c6">:=</span> ipLayer.(<span style="color:#ff79c6">*</span>layers.IPv4)
+        ipv6, ipv6Ok <span style="color:#ff79c6">:=</span> ipLayer.(<span style="color:#ff79c6">*</span>layers.IPv6)
+        <span style="color:#ff79c6">if</span> !ipv4Ok <span style="color:#ff79c6">&amp;&amp;</span> !ipv6Ok {
+            log.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;Failed to cast packet to IPv4 or IPv6&#34;</span>)
+            <span style="color:#ff79c6">continue</span>
+        }
+
+        tcpLayer <span style="color:#ff79c6">:=</span> packet.<span style="color:#50fa7b">Layer</span>(layers.LayerTypeTCP)
+        <span style="color:#ff79c6">if</span> tcpLayer <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
+            log.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;Not a TCP Packet&#34;</span>)
+            <span style="color:#ff79c6">continue</span>
+        }
+
+        tcp, ok <span style="color:#ff79c6">:=</span> tcpLayer.(<span style="color:#ff79c6">*</span>layers.TCP)
+        <span style="color:#ff79c6">if</span> !ok {
+            log.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;Failed to cast packet to TCP&#34;</span>)
+            <span style="color:#ff79c6">continue</span>
+        }
+
+        appLayer <span style="color:#ff79c6">:=</span> packet.<span style="color:#50fa7b">ApplicationLayer</span>()
+        <span style="color:#ff79c6">if</span> appLayer <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
+            log.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;No ApplicationLayer payload&#34;</span>)
+            <span style="color:#ff79c6">continue</span>
+        }
+
+        packetData <span style="color:#ff79c6">:=</span> appLayer.<span style="color:#50fa7b">Payload</span>()
+        <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> parser.<span style="color:#50fa7b">DecodeLayers</span>(packetData, <span style="color:#ff79c6">&amp;</span>decoded); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+            fmt.<span style="color:#50fa7b">Printf</span>(<span style="color:#f1fa8c">&#34;Could not decode layers: %v\n&#34;</span>, err)
+            <span style="color:#ff79c6">continue</span>
+        }
+
+        fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;*****************************************************&#34;</span>)
+        <span style="color:#ff79c6">if</span> ipv4Ok {
+            fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;IPv4 SrcIP:        &#34;</span>, ipv4.SrcIP)
+            fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;IPv4 DstIP:        &#34;</span>, ipv4.DstIP)
+        } <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span> ipv6Ok {
+            fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;IPv6 SrcIP:        &#34;</span>, ipv6.SrcIP)
+            fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;IPv6 DstIP:        &#34;</span>, ipv6.DstIP)
+        }
+        fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;TCP srcPort:       &#34;</span>, tcp.SrcPort)
+        fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;TCP dstPort:       &#34;</span>, tcp.DstPort)
+        fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;HTTP/2:            &#34;</span>, h2c.frame)
+        fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;*****************************************************&#34;</span>)
+    }
+}
+</code></pre></div><h2 id="conclusion">Conclusion</h2>
+<p>Using Go&rsquo;s native HTTP support and Gopacket, we could build a packet interception program for HTTP/2. For further HTTP/2 header processing, we could also use <code>net/http2/hpack</code> package to do the HPACK decoding and encoding.</p>
+
+        </div>
+        
+
+
+<div class="post-info">
+    
+        <div class="post-date">2020-03-12</div>
+    
+    <div class="post-taxonomies">
+        
+            
+    </div>
+</div>
+
+    </article>
+
+    
+        
+    <div class="pagination post-pagination">
+        <div class="left pagination-item ">
+            
+                <a href="/posts/formula-1-cars-is-a-fascinating-engineering-problem-masterpiece/">Formula 1 Cars is a Fascinating Engineering Problem / Masterpiece</a>
+            
+        </div>
+        <div class="right pagination-item ">
+            
+                <a href="/posts/wwdc19-best-dub-dub-ever/">WWDC19: Best Dub-Dub ever!</a>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+
+        </main>
+        
+            <footer class="common-footer">
+    
+    
+
+    <div class="common-footer-bottom">
+        
+        <div class="copyright">
+            <p>© 2021<br>
+            Powered by <a target="_blank" rel="noopener noreferrer" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" rel="noopener noreferrer" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.
+            </p>  
+        </div> 
+
+        
+
+    
+
+
+
+    <button class="theme-switcher">
+        Dark theme
+    </button>
+
+    <script>
+    const STORAGE_KEY = 'user-color-scheme'
+    const defaultTheme = "auto"
+
+    let currentTheme
+    let switchButton
+    let autoDefinedScheme = window.matchMedia('(prefers-color-scheme: dark)')
+
+    const autoChangeScheme = e => {
+        currentTheme = e.matches ? 'dark' : 'light'
+        document.documentElement.setAttribute('data-theme', currentTheme)
+        changeButtonText()
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        switchButton = document.querySelector('.theme-switcher')
+        currentTheme = detectCurrentScheme()
+        if (currentTheme == 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark')
+        }
+        if (currentTheme == 'auto') {
+            autoChangeScheme(autoDefinedScheme);
+            autoDefinedScheme.addListener(autoChangeScheme);
+        }
+        changeButtonText()
+        switchButton.addEventListener('click', switchTheme, false)
+    })
+
+    function detectCurrentScheme() {
+        if (localStorage.getItem(STORAGE_KEY)) {
+            return localStorage.getItem(STORAGE_KEY)
+        } 
+        if (defaultTheme) {
+            return defaultTheme
+        } 
+        if (!window.matchMedia) {
+            return 'light'
+        } 
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark'
+        }
+        return 'light'
+    }
+
+    function changeButtonText()
+    {   
+        switchButton.textContent = currentTheme == 'dark' ?  "Light theme" : "Dark theme"
+    }
+
+    function switchTheme(e) {
+        if (currentTheme == 'dark') {
+            localStorage.setItem(STORAGE_KEY, 'light')
+            document.documentElement.setAttribute('data-theme', 'light')
+            currentTheme = 'light'
+        } else {
+            localStorage.setItem(STORAGE_KEY, 'dark')
+            document.documentElement.setAttribute('data-theme', 'dark')
+            currentTheme = 'dark'
+        }
+        changeButtonText()
+    }
+    </script>
+   
+    </div>
+</footer>
+
+        
+    </div>
+</body>
+</html>

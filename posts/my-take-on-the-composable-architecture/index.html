@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+
+
+<html lang="en-us" data-theme="">
+<head>
+    
+        
+<meta charset="utf-8">
+<meta name="HandheldFriendly" content="True">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer-when-downgrade">
+
+<title>My take on The Composable Architecture - abram.id</title>
+<meta name="description" content="">
+
+<link rel="icon" type="image/x-icon" href="https://abram.id/favicon.ico">
+<link rel="apple-touch-icon-precomposed" href="https://abram.id/favicon.png">
+
+
+
+    
+
+
+
+
+
+    
+    
+    
+
+    
+        <link rel="stylesheet" href="https://abram.id/css/style.bf67952500c522fa4be2b487513979e2a6f82a03826f34db9e4592670b2a1c3b.css" integrity="sha256-v2eVJQDFIvpL4rSHUTl54qb4KgOCbzTbnkWSZwsqHDs=">
+    
+
+
+
+
+
+    
+
+
+
+
+
+    
+    
+    
+
+    
+        <link rel="stylesheet" href="https://abram.id/css/style.b9b83862c8dccf2c4b1642c9fba82e8360729a7f4bc26116d01745dcc3bb8b82.css" integrity="sha256-ubg4YsjczyxLFkLJ&#43;6gug2Bymn9LwmEW0BdF3MO7i4I=">
+    
+
+
+
+
+
+<meta property="og:title" content="My take on The Composable Architecture" />
+<meta property="og:description" content="Context: Typical iOS App Architecture The claim Experiments What I love What I don&rsquo;t love Where should I go next? References  The Composable Architecture or TCA for short is a library to build application in a consistent and understandable manner, with composition, testing, and ergonomics in mind. This library is made by Point-Free to apply the concepts of functional programming in a practical way.
+Context: Typical iOS App Architecture In the world of iOS development, there&rsquo;s a few 4 most commonly used patterns in architecting an iOS application." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://abram.id/posts/my-take-on-the-composable-architecture/" />
+<meta property="article:published_time" content="2020-10-25T10:08:00+07:00" />
+<meta property="article:modified_time" content="2020-10-25T10:08:00+07:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="My take on The Composable Architecture"/>
+<meta name="twitter:description" content="Context: Typical iOS App Architecture The claim Experiments What I love What I don&rsquo;t love Where should I go next? References  The Composable Architecture or TCA for short is a library to build application in a consistent and understandable manner, with composition, testing, and ergonomics in mind. This library is made by Point-Free to apply the concepts of functional programming in a practical way.
+Context: Typical iOS App Architecture In the world of iOS development, there&rsquo;s a few 4 most commonly used patterns in architecting an iOS application."/>
+
+
+
+
+
+
+
+
+
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to main content</a>
+    <div class="container">
+        <header class="common-header"> 
+            
+                <h1 class="site-title">
+    <a href="/">abram.id</a>
+</h1>
+
+    <nav>
+        
+        
+        <a class="" href="https://abram.id/about/" title="About">About</a>
+        
+        <a class="" href="https://abram.id/tags/" title="Tags">Tags</a>
+        
+        <a class="" href="https://abram.id/posts/" title="Archive">Archive</a>
+        
+    </nav>
+
+
+            
+        </header>
+        <main id="main" tabindex="-1"> 
+            
+    
+    
+    <article class="post">
+        <header class="post-header">
+            <h1 class="post-title">My take on The Composable Architecture</h1>
+        </header>
+        <div class="content">
+            <!-- raw HTML omitted -->
+<ul>
+<li><a href="#context-typical-ios-app-architecture">Context: Typical iOS App Architecture</a></li>
+<li><a href="#the-claim">The claim</a></li>
+<li><a href="#experiments">Experiments</a></li>
+<li><a href="#what-i-love">What I love</a></li>
+<li><a href="#what-i-don-t-love">What I don&rsquo;t love</a></li>
+<li><a href="#where-should-i-go-next">Where should I go next?</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+<!-- raw HTML omitted -->
+<p>The Composable Architecture or TCA for short is a library to build application in a consistent and understandable manner, with composition, testing, and ergonomics in mind. This library is made by Point-Free to apply the concepts of functional programming in a practical way.</p>
+<h2 id="context-typical-ios-app-architecture">Context: Typical iOS App Architecture</h2>
+<p>In the world of iOS development, there&rsquo;s a few 4 most commonly used patterns in architecting an iOS application. Most notably MVC, MVP, MVVM, and VIPER. The details of these architecture is beyond the scope of this article. All these architecture has their own advantages and drawbacks. For example, MVC is simple but misusing it will cause a Massive View Controller. VIPER provides a good testability but it&rsquo;ll generate much boilerplate code. At the end of the day, architectural decisions are based on the combination of use case, complexity, and many other variables. So there&rsquo;s no such thing as the silver bullet of iOS architecture.</p>
+<h2 id="the-claim">The claim</h2>
+<p>As the new guy in the iOS architecture neighborhood, TCA claims to provide:</p>
+<ul>
+<li><strong>Consistency</strong>: degree of firmness, density, viscosity, or resistance to movement or separation of constituent particles</li>
+<li><strong>Composition</strong>: a product of mixing or combining various elements or ingredients</li>
+<li><strong>Testing</strong></li>
+<li><strong>Ergonomics</strong>: a product of mixing or combining various elements or ingredients</li>
+</ul>
+<p>In this blog, we&rsquo;ll test whether TCA fulfills what it claims to do or not.</p>
+<h2 id="experiments">Experiments</h2>
+<p>We&rsquo;ll create a song reader app that have the capability to add songs to favorites and see all the favorites we have. All the code snippet in this blog is taken from my <a href="https://github.com/abrampers/lagu-sion-ios">Lagu Sion implementation</a>.</p>
+<h3 id="setting-up">Setting up</h3>
+<p>To install this library, generate a new iOS application in your Xcode and add TCA to your Swift Package Dependency. More info, <a href="https://github.com/pointfreeco/swift-composable-architecture#installation">head here</a>.</p>
+<h3 id="building-the-app">Building the app</h3>
+<p>In this blog, I&rsquo;ll build the app from the smallest component possible and work ourselves up and wire everything up.</p>
+<h4 id="modeling-song">Modeling song</h4>
+<p>Simple, we can make a struct that contains all the fields needed. In this case we need to generate the id and song</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-swift" data-lang="swift">
+<span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">struct</span> <span style="color:#50fa7b">Song</span>: <span style="color:#8be9fd;font-style:italic">Equatable</span>, Identifiable {
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#8be9fd;font-style:italic">id</span>: UUID
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#8be9fd;font-style:italic">number</span>: <span style="color:#8be9fd;font-style:italic">Int</span>
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#8be9fd;font-style:italic">title</span>: <span style="color:#8be9fd;font-style:italic">String</span>
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#8be9fd;font-style:italic">verses</span>: [Verse]
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#8be9fd;font-style:italic">reff</span>: Verse?
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#8be9fd;font-style:italic">songBook</span>: SongBook
+
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">init</span>(id: UUID, number: <span style="color:#8be9fd;font-style:italic">Int</span>, title: <span style="color:#8be9fd;font-style:italic">String</span>, verses: [Verse], reff: Verse? = <span style="color:#ff79c6">nil</span>, songBook: SongBook) {
+        <span style="color:#ff79c6">self</span>.id = id
+        <span style="color:#ff79c6">self</span>.number = number
+        <span style="color:#ff79c6">self</span>.title = title
+        <span style="color:#ff79c6">self</span>.verses = verses
+        <span style="color:#ff79c6">self</span>.reff = reff
+        <span style="color:#ff79c6">self</span>.songBook = songBook
+    }
+
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">prefix</span>: <span style="color:#8be9fd;font-style:italic">String</span> { songBook.<span style="color:#ff79c6">prefix</span> }
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">color</span>: Color { songBook.color }
+}
+
+<span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">struct</span> <span style="color:#50fa7b">SongViewState</span>: <span style="color:#8be9fd;font-style:italic">Equatable</span>, Identifiable {
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">id</span>: UUID {
+        <span style="color:#ff79c6">return</span> song.id
+    }
+
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">song</span>: Song
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">isFavorite</span>: <span style="color:#8be9fd;font-style:italic">Bool</span>
+
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">init</span>(song: Song, isFavorite: <span style="color:#8be9fd;font-style:italic">Bool</span>) {
+        <span style="color:#ff79c6">self</span>.song = song
+        <span style="color:#ff79c6">self</span>.isFavorite = isFavorite
+    }
+}
+
+<span style="color:#8be9fd;font-style:italic">extension</span> <span style="color:#50fa7b">SongViewState</span> {
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">number</span>: <span style="color:#8be9fd;font-style:italic">Int</span> { song.number }
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">title</span>: <span style="color:#8be9fd;font-style:italic">String</span> { song.title }
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">verses</span>: [Verse] { song.verses }
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">reff</span>: Verse? { song.reff }
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">prefix</span>: <span style="color:#8be9fd;font-style:italic">String</span> { song.<span style="color:#ff79c6">prefix</span> }
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">color</span>: Color { song.color }
+}
+</code></pre></div><h4 id="modeling-action-to-be-made-on-song-view">Modeling action to be made on Song View</h4>
+<p>Simple, just use Swift’s enum to enumerate all the possible action.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-swift" data-lang="swift">
+<span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">enum</span> <span style="color:#50fa7b">SongAction</span>: <span style="color:#8be9fd;font-style:italic">Equatable</span> {
+    <span style="color:#ff79c6">case</span> heartTapped
+    <span style="color:#ff79c6">case</span> removeFromFavorites
+    <span style="color:#ff79c6">case</span> addToFavorites
+}
+</code></pre></div><h4 id="modeling-what-will-happen-when-action-appears">Modeling what will happen when action appears</h4>
+<p>Here, we start to use TCA’s first feature: Reducer. TCA will receive all the action that the views will trigger and after that, the action will be processed through the reducer. In TCA, reducer is the place where logic happens. State mutations, logical operation, and action handling is happening in the reducer.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-swift" data-lang="swift">
+<span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#8be9fd;font-style:italic">songReducer</span> = Reducer&lt;SongViewState, SongAction, SongEnvironment&gt; { state, action, environment <span style="color:#ff79c6">in</span>
+    <span style="color:#ff79c6">switch</span> action {
+    <span style="color:#ff79c6">case</span> .heartTapped:
+        <span style="color:#ff79c6">if</span> <span style="color:#ff79c6">!</span>state.isFavorite {
+            <span style="color:#ff79c6">return</span> Effect(value: SongAction.addToFavorites)
+        } <span style="color:#ff79c6">else</span> {
+            <span style="color:#ff79c6">return</span> Effect(value: SongAction.removeFromFavorites)
+        }
+
+    <span style="color:#ff79c6">case</span> .addToFavorites, .removeFromFavorites:
+        <span style="color:#ff79c6">return</span> .<span style="color:#ff79c6">none</span>
+    }
+}
+</code></pre></div><h4 id="implement-how-the-song-view-will-look-like">Implement how the Song View will look like</h4>
+<p>Simple, we create a view just like other SwiftUI views, but at the end, we’ll wire up the view with the state through a concept called <code>Store</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-swift" data-lang="swift">
+<span style="color:#8be9fd;font-style:italic">private</span> <span style="color:#8be9fd;font-style:italic">struct</span> <span style="color:#50fa7b">TitleView</span>: View {
+    <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#8be9fd;font-style:italic">title</span>: <span style="color:#8be9fd;font-style:italic">String</span>
+
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">body</span>: some View {
+        HStack {
+            Spacer()
+            Text(title)
+                .font(.system(size: <span style="color:#bd93f9">32</span>, weight: .bold, design: .`<span style="color:#ff79c6">default</span>`))
+                .multilineTextAlignment(.center)
+            Spacer()
+        }
+    }
+}
+
+<span style="color:#8be9fd;font-style:italic">private</span> <span style="color:#8be9fd;font-style:italic">struct</span> <span style="color:#50fa7b">VerseView</span>: View {
+    <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#8be9fd;font-style:italic">verse</span>: Verse
+
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">body</span>: some View {
+        VStack(alignment: .center, spacing: <span style="color:#bd93f9">10</span>) {
+            ForEach(<span style="color:#bd93f9">0.</span>.&lt;<span style="color:#ff79c6">self</span>.verse.contents.count) { (j) <span style="color:#ff79c6">in</span>
+                Text(<span style="color:#ff79c6">self</span>.verse.contents[j])
+            }
+        }
+    }
+}
+
+<span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">struct</span> <span style="color:#50fa7b">SongView</span>: View {
+    <span style="color:#8be9fd;font-style:italic">private</span> <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#8be9fd;font-style:italic">store</span>: Store&lt;SongViewState, SongAction&gt;
+    <span style="color:#8be9fd;font-style:italic">private</span> <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#8be9fd;font-style:italic">enableFavoriteButton</span>: <span style="color:#8be9fd;font-style:italic">Bool</span>
+
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">init</span>(store: Store&lt;SongViewState, SongAction&gt;, enableFavoriteButton: <span style="color:#8be9fd;font-style:italic">Bool</span>) {
+        <span style="color:#ff79c6">self</span>.store = store
+        <span style="color:#ff79c6">self</span>.enableFavoriteButton = enableFavoriteButton
+    }
+
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">body</span>: some View {
+        WithViewStore(<span style="color:#ff79c6">self</span>.store) { viewStore <span style="color:#ff79c6">in</span>
+            ScrollView(.vertical, showsIndicators: <span style="color:#ff79c6">true</span>) {
+                VStack(alignment: .center, spacing: <span style="color:#bd93f9">10</span>) {
+                    Spacer()
+                    TitleView(title: viewStore.title)
+                    Spacer()
+                    ForEach(<span style="color:#bd93f9">0.</span>.&lt;viewStore.verses.count) { i <span style="color:#ff79c6">in</span>
+                        Text(<span style="color:#f1fa8c">&#34;</span><span style="color:#f1fa8c">\(</span>i <span style="color:#ff79c6">+</span> <span style="color:#bd93f9">1</span><span style="color:#f1fa8c">)</span><span style="color:#f1fa8c">&#34;</span>)
+                            .font(.system(.headline))
+                        VerseView(verse: viewStore.verses[i])
+                        Unwrap(viewStore.reff) { reff <span style="color:#ff79c6">in</span>
+                            Spacer()
+                            VerseView(verse: reff)
+                        }
+                        Spacer()
+                    }
+                    Spacer()
+                }
+            }
+            .navigationBarTitle(Text(<span style="color:#f1fa8c">&#34;</span><span style="color:#f1fa8c">\(</span>viewStore.<span style="color:#ff79c6">prefix</span><span style="color:#f1fa8c">)</span><span style="color:#f1fa8c"> no. </span><span style="color:#f1fa8c">\(</span>viewStore.number<span style="color:#f1fa8c">)</span><span style="color:#f1fa8c">&#34;</span>))
+            .navigationBarItems(
+                trailing: Button(action: { viewStore.send(.heartTapped) }) {
+                    Image(systemName: viewStore.isFavorite ? <span style="color:#f1fa8c">&#34;heart.fill&#34;</span> : <span style="color:#f1fa8c">&#34;heart&#34;</span>)
+                }
+                .disabled(<span style="color:#ff79c6">!</span><span style="color:#ff79c6">self</span>.enableFavoriteButton)
+            )
+        }
+    }
+}
+</code></pre></div><h4 id="previews">Previews</h4>
+<p>Since we haven’t wire up the view to any entry point, we can use SwiftUI previews to see how our view implementation is going.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-swift" data-lang="swift">
+<span style="color:#8be9fd;font-style:italic">internal</span> <span style="color:#8be9fd;font-style:italic">struct</span> <span style="color:#50fa7b">SongView_Previews</span>: PreviewProvider {
+    <span style="color:#8be9fd;font-style:italic">static</span> <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">previews</span>: some View {
+        SongView(
+            store: Store(
+                initialState: SongViewState(
+                    song: Song(
+                        id: UUID(),
+                        number: <span style="color:#bd93f9">1</span>,
+                        title: <span style="color:#f1fa8c">&#34;Di Hadapan Hadirat-Mu&#34;</span>,
+                        verses: [
+                            Verse(contents: [
+                                <span style="color:#f1fa8c">&#34;Di hadapan hadirat-Mu&#34;</span>,
+                                <span style="color:#f1fa8c">&#34;Kami umat-Mu menyembah&#34;</span>,
+                                <span style="color:#f1fa8c">&#34;Mengakui Engkau Tuhan&#34;</span>,
+                                <span style="color:#f1fa8c">&#34;Allah kekal, Maha kuasa&#34;</span>
+                            ]),
+                            Verse(contents: [
+                                <span style="color:#f1fa8c">&#34;Dari debu dan tanahlah&#34;</span>,
+                                <span style="color:#f1fa8c">&#34;kita dijadikan Tuhan&#34;</span>,
+                                <span style="color:#f1fa8c">&#34;Dan bila tersesat kita&#34;</span>,
+                                <span style="color:#f1fa8c">&#34;Tuhan tak akan tinggalkan&#34;</span>,
+                            ]),
+                            Verse(contents: [
+                                <span style="color:#f1fa8c">&#34;Kuasa serta kasih Allah&#34;</span>,
+                                <span style="color:#f1fa8c">&#34;Memenuhi seg’nap dunia&#34;</span>,
+                                <span style="color:#f1fa8c">&#34;Tetap teguhlah firman-Nya&#34;</span>,
+                                <span style="color:#f1fa8c">&#34;Hingga penuh hadirat-Nya&#34;</span>,
+                            ]),
+                            Verse(contents: [
+                                <span style="color:#f1fa8c">&#34;Di pintu Surga yang suci&#34;</span>,
+                                <span style="color:#f1fa8c">&#34;menyanyi beribu lidah&#34;</span>,
+                                <span style="color:#f1fa8c">&#34;Pada Tuhan kita puji&#34;</span>,
+                                <span style="color:#f1fa8c">&#34;Sekarang dan selamanya&#34;</span>,
+                            ])
+                        ], songBook: .laguSion
+                    ),
+                    isFavorite: <span style="color:#ff79c6">false</span>
+                ),
+                reducer: songReducer,
+                environment: SongEnvironment()),
+            enableFavoriteButton: <span style="color:#ff79c6">true</span>
+        )
+    }
+}
+</code></pre></div><h4 id="testing-the-implementation">Testing the implementation</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-swift" data-lang="swift">
+<span style="color:#8be9fd;font-style:italic">class</span> <span style="color:#50fa7b">SongTests</span>: XCTestCase {
+    <span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">testHeartTapped_WithIsFavorite_False</span>() {
+        <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#8be9fd;font-style:italic">store</span> = TestStore(
+            initialState: SongViewState(
+                song: Song(id: UUID(), number: <span style="color:#bd93f9">0</span>, title: <span style="color:#f1fa8c">&#34;&#34;</span>, verses: [], songBook: .laguSion),
+                isFavorite: <span style="color:#ff79c6">false</span>
+            ),
+            reducer: songReducer,
+            environment: SongEnvironment()
+        )
+
+        store.assert(
+            .send(.heartTapped),
+            .receive(.addToFavorites)
+        )
+    }
+
+    <span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">testHeartTapped_WithIsFavorite_True</span>() {
+        <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#8be9fd;font-style:italic">store</span> = TestStore(
+            initialState: SongViewState(
+                song: Song(id: UUID(), number: <span style="color:#bd93f9">0</span>, title: <span style="color:#f1fa8c">&#34;&#34;</span>, verses: [], songBook: .laguSion),
+                isFavorite: <span style="color:#ff79c6">true</span>
+            ),
+            reducer: songReducer,
+            environment: SongEnvironment()
+        )
+
+        store.assert(
+            .send(.heartTapped),
+            .receive(.removeFromFavorites)
+        )
+    }
+}
+</code></pre></div><p>For now, let’s take a break from coding and look back what we have made here. First, we have modeled the state of the Song View and actions. Next the reducer and the view. TCA provides us with a framework to pass triggers from view to the reducer through <code>Store</code> . With store, developer can make SwiftUI previews easily. This checks the first claim that TCA is ergonomic.</p>
+<p>Second, testing. <code>Store</code> concept also has it’s corresponding ergonomic component in testing named <code>TestStore</code> . This component enable us to intercept the actions triggered, sequence of actions, or even checks the state after every action sent or received. This checks the second claim that TCA is designed with testing in mind.</p>
+<p>Cool, so far we have covered how TCA is ergonomic and designed with testing in mind. Let’s go to the next part of the implementation to prove the rest TCA claims.</p>
+<h4 id="modeling-main-list-view">Modeling Main List View</h4>
+<p>In the list view state, we store two lists. The list of songs, and favorite songs.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-swift" data-lang="swift">
+<span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">struct</span> <span style="color:#50fa7b">MainState</span>: <span style="color:#8be9fd;font-style:italic">Equatable</span> {
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">songs</span>: [Song]
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">favoriteSongs</span>: [Song]
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">selectedBook</span>: BookSelection
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">searchQuery</span>: <span style="color:#8be9fd;font-style:italic">String</span>
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">selectedSortOption</span>: SortOptions
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">actionSheet</span>: ActionSheetState&lt;MainAction&gt;?
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">alert</span>: AlertState&lt;MainAction&gt;?
+
+    <span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">init</span>(
+        songs: [Song] = [],
+        favoriteSongs: [Song] = [],
+        selectedBook: BookSelection = .all,
+        searchQuery: <span style="color:#8be9fd;font-style:italic">String</span> = <span style="color:#f1fa8c">&#34;&#34;</span>,
+        selectedSortOptions: SortOptions = .number,
+        actionSheet: ActionSheetState&lt;MainAction&gt;? = <span style="color:#ff79c6">nil</span>,
+        alert: AlertState&lt;MainAction&gt;? = <span style="color:#ff79c6">nil</span>
+    ) {
+        <span style="color:#ff79c6">self</span>.songs = songs
+        <span style="color:#ff79c6">self</span>.favoriteSongs = favoriteSongs
+        <span style="color:#ff79c6">self</span>.selectedBook = selectedBook
+        <span style="color:#ff79c6">self</span>.searchQuery = searchQuery
+        <span style="color:#ff79c6">self</span>.selectedSortOption = selectedSortOptions
+        <span style="color:#ff79c6">self</span>.actionSheet = actionSheet
+        <span style="color:#ff79c6">self</span>.alert = alert
+    }
+}
+
+<span style="color:#8be9fd;font-style:italic">extension</span> <span style="color:#50fa7b">MainState</span> {
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">currentSongs</span>: [SongViewState] {
+        <span style="color:#ff79c6">get</span> {
+            <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">result</span>: [Song] = []
+            <span style="color:#ff79c6">switch</span> selectedBook {
+            <span style="color:#ff79c6">case</span> .all:
+                result = songs
+            <span style="color:#ff79c6">case</span> .songBook(<span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#8be9fd;font-style:italic">songBook</span>):
+                result = songs(<span style="color:#ff79c6">for</span>: songBook)
+            }
+
+            <span style="color:#ff79c6">return</span> result.map { song -&gt; SongViewState <span style="color:#ff79c6">in</span>
+                SongViewState(song: song, isFavorite: favoriteSongs.contains(song))
+            }
+        }
+        <span style="color:#ff79c6">set</span> {
+        }
+    }
+
+    <span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">songs</span>(<span style="color:#ff79c6">for</span> songBook: SongBook) -&gt; [Song] {
+        <span style="color:#ff79c6">return</span> songs.filter { song <span style="color:#ff79c6">in</span>
+            song.songBook == songBook
+        }
+    }
+}
+</code></pre></div><h4 id="modeling-the-main-list-view-actions">Modeling the Main List View Actions</h4>
+<p>Here, we’re going to use our previously made <code>songReducer</code> for each song we have in the main list.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-swift" data-lang="swift">
+<span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">enum</span> <span style="color:#50fa7b">MainAction</span>: <span style="color:#8be9fd;font-style:italic">Equatable</span> {
+    <span style="color:#ff79c6">case</span> actionSheetDismissed
+    <span style="color:#ff79c6">case</span> alertDismissed
+    <span style="color:#ff79c6">case</span> appear
+    <span style="color:#ff79c6">case</span> error(LaguSionError)
+    <span style="color:#ff79c6">case</span> getSongs
+    <span style="color:#ff79c6">case</span> setSongs([Song])
+    <span style="color:#ff79c6">case</span> saveSearchQuery(<span style="color:#8be9fd;font-style:italic">String</span>)
+    <span style="color:#ff79c6">case</span> searchQueryChanged(<span style="color:#8be9fd;font-style:italic">String</span>)
+    <span style="color:#ff79c6">case</span> song(index: <span style="color:#8be9fd;font-style:italic">Int</span>, action: SongAction)
+    <span style="color:#ff79c6">case</span> songBookPicked(BookSelection)
+    <span style="color:#ff79c6">case</span> sortOptionChanged(SortOptions)
+    <span style="color:#ff79c6">case</span> sortOptionTapped
+    <span style="color:#ff79c6">case</span> updateFavoriteSongs(newFavorites: [Song])
+
+    <span style="color:#ff79c6">case</span> noOp
+}
+
+<span style="color:#8be9fd;font-style:italic">public</span> <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#8be9fd;font-style:italic">mainReducer</span>: Reducer&lt;MainState, MainAction, MainEnvironment&gt; = .combine(
+    songReducer.forEach(
+        state: \MainState.currentSongs,
+        action: <span style="color:#ff79c6">/</span>MainAction.song(index:action:),
+        environment: { <span style="color:#ff79c6">_</span> <span style="color:#ff79c6">in</span> SongEnvironment() }
+    ),
+    <span style="color:#6272a4">// ...</span>
+)
+</code></pre></div><p>Let’s take a break and see what we did. First, we model the <code>MainState</code> just as we did on <code>SongViewState</code> . After that, we create the model of <code>MainAction</code> and <code>mainReducer</code> . This shows that building component in TCA is consistent. Every layer of the implementation follows the same consistent pattern. This checks the consistency claim.</p>
+<p>Next, TCA also gave us the tools we need to reuse and compose the <code>songReducer</code> in the <code>mainReducer</code>. As we know, the main state, composes song state directly or indirectly. If this happens, we can always compose any state with many other smaller states and we can still have the visibility of anything that happens in the child component. This checks the composability claim.</p>
+<p>Last experiment I’d like to show is to fast forward on how we’re going to wire multiple sibling states to the root state.</p>
+<p>Assume we have implemented the <code>Settings</code> and <code>Favorites</code> section.</p>
+<h4 id="model-app-state">Model App State</h4>
+<p>To wire up all the sibling states to single state, we have to define how are the <code>AppState</code> behave when there’s a change in <code>AppState</code> or if there’s any changes in the child states.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-swift" data-lang="swift">
+<span style="color:#8be9fd;font-style:italic">struct</span> <span style="color:#50fa7b">AppState</span>: <span style="color:#8be9fd;font-style:italic">Equatable</span> {
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">songs</span>: [Song] = []
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">favoriteSongs</span>: [Song] = []
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">selectedBook</span>: BookSelection = .all
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">selectedSortOptions</span>: SortOptions = .number
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">searchQuery</span>: <span style="color:#8be9fd;font-style:italic">String</span> = <span style="color:#f1fa8c">&#34;&#34;</span>
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">mainActionSheet</span>: ActionSheetState&lt;MainAction&gt;? = <span style="color:#ff79c6">nil</span>
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">mainAlert</span>: AlertState&lt;MainAction&gt;? = <span style="color:#ff79c6">nil</span>
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">isAvailableOffline</span>: <span style="color:#8be9fd;font-style:italic">Bool</span> = <span style="color:#ff79c6">false</span>
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">fontSelection</span>: FontSelection = .normal
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">contentSizeSelection</span>: ContentSizeSelection = .normal
+}
+
+<span style="color:#8be9fd;font-style:italic">extension</span> <span style="color:#50fa7b">AppState</span> {
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">main</span>: MainState {
+        <span style="color:#ff79c6">get</span> {
+            MainState(
+                songs: <span style="color:#ff79c6">self</span>.songs,
+                favoriteSongs: <span style="color:#ff79c6">self</span>.favoriteSongs,
+                selectedBook: <span style="color:#ff79c6">self</span>.selectedBook,
+                searchQuery: <span style="color:#ff79c6">self</span>.searchQuery,
+                selectedSortOptions: <span style="color:#ff79c6">self</span>.selectedSortOptions,
+                actionSheet: <span style="color:#ff79c6">self</span>.mainActionSheet,
+                alert: <span style="color:#ff79c6">self</span>.mainAlert
+            )
+        }
+        <span style="color:#ff79c6">set</span> {
+            <span style="color:#ff79c6">self</span>.songs = newValue.songs
+            <span style="color:#ff79c6">self</span>.favoriteSongs = newValue.favoriteSongs
+            <span style="color:#ff79c6">self</span>.selectedBook = newValue.selectedBook
+            <span style="color:#ff79c6">self</span>.searchQuery = newValue.searchQuery
+            <span style="color:#ff79c6">self</span>.selectedSortOptions = newValue.selectedSortOption
+            <span style="color:#ff79c6">self</span>.mainActionSheet = newValue.actionSheet
+            <span style="color:#ff79c6">self</span>.mainAlert = newValue.alert
+        }
+    }
+
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">favorites</span>: FavoritesState {
+        <span style="color:#ff79c6">get</span> {
+            FavoritesState(songs: <span style="color:#ff79c6">self</span>.songs, favoriteSongs: <span style="color:#ff79c6">self</span>.favoriteSongs)
+        }
+        <span style="color:#ff79c6">set</span> {
+            <span style="color:#ff79c6">self</span>.songs = newValue.songs
+            <span style="color:#ff79c6">self</span>.favoriteSongs = newValue.favoriteSongs
+        }
+    }
+
+    <span style="color:#8be9fd;font-style:italic">var</span> <span style="color:#8be9fd;font-style:italic">settings</span>: SettingsState {
+        <span style="color:#ff79c6">get</span> {
+            SettingsState(
+                isAvailableOffline: <span style="color:#ff79c6">self</span>.isAvailableOffline,
+                fontSelection: <span style="color:#ff79c6">self</span>.fontSelection,
+                contentSizeSelection: <span style="color:#ff79c6">self</span>.contentSizeSelection
+            )
+        }
+        <span style="color:#ff79c6">set</span> {
+            <span style="color:#ff79c6">self</span>.isAvailableOffline = newValue.isAvailableOffline
+            <span style="color:#ff79c6">self</span>.fontSelection = newValue.fontSelection
+            <span style="color:#ff79c6">self</span>.contentSizeSelection = newValue.contentSizeSelection
+        }
+    }
+}
+</code></pre></div><h4 id="model-action-and-reducer">Model Action and Reducer</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-swift" data-lang="swift"><span style="color:#8be9fd;font-style:italic">enum</span> <span style="color:#50fa7b">AppAction</span> {
+    <span style="color:#ff79c6">case</span> main(MainAction)
+    <span style="color:#ff79c6">case</span> favorites(FavoritesAction)
+    <span style="color:#ff79c6">case</span> settings(SettingsAction)
+}
+
+<span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#8be9fd;font-style:italic">appReducer</span>: Reducer&lt;AppState, AppAction, AppEnvironment&gt; = .combine(
+    mainReducer.pullback(
+        state: \AppState.main,
+        action: <span style="color:#ff79c6">/</span>AppAction.main,
+        environment: { env <span style="color:#ff79c6">in</span>
+            MainEnvironment(
+                mainQueue: env.mainQueue,
+                laguSionDataSource: env.laguSionDataSource
+            )
+        }
+    ),
+    favoritesReducer.pullback(
+        state: \AppState.favorites,
+        action: <span style="color:#ff79c6">/</span>AppAction.favorites,
+        environment: { <span style="color:#ff79c6">_</span> <span style="color:#ff79c6">in</span> FavoritesEnvironment() }
+    ),
+    settingsReducer.pullback(
+        state: \AppState.settings,
+        action: <span style="color:#ff79c6">/</span>AppAction.settings,
+        environment: { <span style="color:#ff79c6">_</span> <span style="color:#ff79c6">in</span> SettingsEnvironment() }
+    )
+)
+</code></pre></div><p>Let’s stop and review again. In this section, we made the state, actions, and reducer. But if we look closely, <code>appReducer</code> is doing nothing but composing all the child reducers and passing its respective states and actions using <code>pullback</code>. This ultimately checks again the composability claim of TCA.</p>
+<h2 id="what-i-love">What I love</h2>
+<p>As we can see from the experiment, TCA delivers what it promised. Consistency, Composability, Testing, and Ergonomic. Personally, my favorite thing in TCA is how we can build mini components and wire it up to the chain until it has reaches the root/single source of truth. This ensures data consistency throughout screen and states.</p>
+<h2 id="what-i-don-t-love">What I don&rsquo;t love</h2>
+<p>Right now, there&rsquo;s no valid proof that this architecture is used in a huge app with high complexity. So we still have no idea on the extent of this architecture.</p>
+<h2 id="where-should-i-go-next">Where should I go next?</h2>
+<p>If you&rsquo;re interested in how this library is designed, go to <a href="https://www.pointfree.co/collections/composable-architecture">Composable Architecture series</a>. If you&rsquo;re into functional programming, especially in Swift, check out <a href="https://www.pointfree.co">Point-Free&rsquo;s site</a>. They cover a lot of interesting ideas of functional programming specifically in Swift. If need more example of a working app using TCA, visit <a href="https://github.com/pointfreeco/swift-composable-architecture#examples">TCA&rsquo;s GitHub examples</a>.</p>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://github.com/pointfreeco/swift-composable-architecture">https://github.com/pointfreeco/swift-composable-architecture</a></li>
+</ul>
+
+        </div>
+        
+
+
+<div class="post-info">
+    
+        <div class="post-date">2020-10-25</div>
+    
+    <div class="post-taxonomies">
+        
+            
+    </div>
+</div>
+
+    </article>
+
+    
+        
+    <div class="pagination post-pagination">
+        <div class="left pagination-item ">
+            
+                <a href="/posts/2020-year-in-review/">2020: Year In Review</a>
+            
+        </div>
+        <div class="right pagination-item ">
+            
+                <a href="/posts/formula-1-cars-is-a-fascinating-engineering-problem-masterpiece/">Formula 1 Cars is a Fascinating Engineering Problem / Masterpiece</a>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+
+        </main>
+        
+            <footer class="common-footer">
+    
+    
+
+    <div class="common-footer-bottom">
+        
+        <div class="copyright">
+            <p>© 2021<br>
+            Powered by <a target="_blank" rel="noopener noreferrer" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" rel="noopener noreferrer" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.
+            </p>  
+        </div> 
+
+        
+
+    
+
+
+
+    <button class="theme-switcher">
+        Dark theme
+    </button>
+
+    <script>
+    const STORAGE_KEY = 'user-color-scheme'
+    const defaultTheme = "auto"
+
+    let currentTheme
+    let switchButton
+    let autoDefinedScheme = window.matchMedia('(prefers-color-scheme: dark)')
+
+    const autoChangeScheme = e => {
+        currentTheme = e.matches ? 'dark' : 'light'
+        document.documentElement.setAttribute('data-theme', currentTheme)
+        changeButtonText()
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        switchButton = document.querySelector('.theme-switcher')
+        currentTheme = detectCurrentScheme()
+        if (currentTheme == 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark')
+        }
+        if (currentTheme == 'auto') {
+            autoChangeScheme(autoDefinedScheme);
+            autoDefinedScheme.addListener(autoChangeScheme);
+        }
+        changeButtonText()
+        switchButton.addEventListener('click', switchTheme, false)
+    })
+
+    function detectCurrentScheme() {
+        if (localStorage.getItem(STORAGE_KEY)) {
+            return localStorage.getItem(STORAGE_KEY)
+        } 
+        if (defaultTheme) {
+            return defaultTheme
+        } 
+        if (!window.matchMedia) {
+            return 'light'
+        } 
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark'
+        }
+        return 'light'
+    }
+
+    function changeButtonText()
+    {   
+        switchButton.textContent = currentTheme == 'dark' ?  "Light theme" : "Dark theme"
+    }
+
+    function switchTheme(e) {
+        if (currentTheme == 'dark') {
+            localStorage.setItem(STORAGE_KEY, 'light')
+            document.documentElement.setAttribute('data-theme', 'light')
+            currentTheme = 'light'
+        } else {
+            localStorage.setItem(STORAGE_KEY, 'dark')
+            document.documentElement.setAttribute('data-theme', 'dark')
+            currentTheme = 'dark'
+        }
+        changeButtonText()
+    }
+    </script>
+   
+    </div>
+</footer>
+
+        
+    </div>
+</body>
+</html>
