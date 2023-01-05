@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Categories on abram.id</title>
-    <link>https://abram.id/categories/</link>
-    <description>abram.id (Categories)</description>
+    <title>Categories on abram&#39;s blog</title>
+    <link>https://abrampers.github.io/categories/</link>
+    <description>abram&#39;s blog (Categories)</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     
-    <atom:link href="https://abram.id/categories/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://abrampers.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     
     
   </channel>

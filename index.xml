@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>abram.id</title>
-    <link>https://abram.id/</link>
-    <description>abram.id</description>
+    <title>abram&#39;s blog</title>
+    <link>https://abrampers.github.io/</link>
+    <description>abram&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 05 Jan 2021 22:39:00 +0700</lastBuildDate>
     
-    <atom:link href="https://abram.id/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://abrampers.github.io/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>2020: Year In Review</title>
-      <link>https://abram.id/posts/2020-year-in-review/</link>
+      <link>https://abrampers.github.io/posts/2020-year-in-review/</link>
       <pubDate>Tue, 05 Jan 2021 22:39:00 +0700</pubDate>
       
-      <guid>https://abram.id/posts/2020-year-in-review/</guid>
+      <guid>https://abrampers.github.io/posts/2020-year-in-review/</guid>
       <description>&lt;!-- raw HTML omitted --&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;#positives&#34;&gt;Positives&lt;/a&gt;&lt;/li&gt;
@@ -87,10 +87,10 @@
     
     <item>
       <title>My take on The Composable Architecture</title>
-      <link>https://abram.id/posts/my-take-on-the-composable-architecture/</link>
+      <link>https://abrampers.github.io/posts/my-take-on-the-composable-architecture/</link>
       <pubDate>Sun, 25 Oct 2020 10:08:00 +0700</pubDate>
       
-      <guid>https://abram.id/posts/my-take-on-the-composable-architecture/</guid>
+      <guid>https://abrampers.github.io/posts/my-take-on-the-composable-architecture/</guid>
       <description>&lt;!-- raw HTML omitted --&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;#context-typical-ios-app-architecture&#34;&gt;Context: Typical iOS App Architecture&lt;/a&gt;&lt;/li&gt;
@@ -542,10 +542,10 @@
     
     <item>
       <title>Formula 1 Cars is a Fascinating Engineering Problem / Masterpiece</title>
-      <link>https://abram.id/posts/formula-1-cars-is-a-fascinating-engineering-problem-masterpiece/</link>
+      <link>https://abrampers.github.io/posts/formula-1-cars-is-a-fascinating-engineering-problem-masterpiece/</link>
       <pubDate>Thu, 08 Oct 2020 23:19:00 +0700</pubDate>
       
-      <guid>https://abram.id/posts/formula-1-cars-is-a-fascinating-engineering-problem-masterpiece/</guid>
+      <guid>https://abrampers.github.io/posts/formula-1-cars-is-a-fascinating-engineering-problem-masterpiece/</guid>
       <description>&lt;!-- raw HTML omitted --&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;#context&#34;&gt;Context&lt;/a&gt;&lt;/li&gt;
@@ -555,7 +555,7 @@
 &lt;li&gt;&lt;a href=&#34;#references&#34;&gt;References&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;!-- raw HTML omitted --&gt;
-&lt;figure&gt;&lt;img src=&#34;https://abram.id/images/f1-vettel-ferrari.jpg&#34;
+&lt;figure&gt;&lt;img src=&#34;https://abrampers.github.io/images/f1-vettel-ferrari.jpg&#34;
          alt=&#34;Figure 1: Sebastian Vettel on his Ferrari (Photo by Sven Brandsma on Unsplash)&#34; width=&#34;800&#34;/&gt;&lt;figcaption&gt;
             &lt;p&gt;Figure 1: Sebastian Vettel on his Ferrari (Photo by &lt;a href=&#34;https://unsplash.com/@seffen99?utm%5Fsource=unsplash&amp;amp;utm%5Fmedium=referral&amp;amp;utm%5Fcontent=creditCopyText&#34;&gt;Sven Brandsma&lt;/a&gt; on &lt;a href=&#34;https://unsplash.com/s/photos/formula-1?utm%5Fsource=unsplash&amp;amp;utm%5Fmedium=referral&amp;amp;utm%5Fcontent=creditCopyText&#34;&gt;Unsplash&lt;/a&gt;)&lt;/p&gt;
         &lt;/figcaption&gt;
@@ -592,7 +592,7 @@
 &lt;h2 id=&#34;aspects-of-a-formula-1-car&#34;&gt;Aspects of a Formula 1 Car&lt;/h2&gt;
 &lt;h3 id=&#34;power-unit&#34;&gt;Power Unit&lt;/h3&gt;
 &lt;p&gt;Currently, F1 cars use hybrid power unit with 4 stroke internal combustion engine. The power unit will generate power by suck, squeeze, bang, blow phases on the fuel. The fuel will flow from the tank to the engine cylinders in a regulated rate. So no team can cheat by having more fuel per amount of time. The power generated will turn the axle who’s connected to the gearbox. The gearbox’s purpose here is to make sure the engine is operating in the optimal RPM to produce the maximum amount of power.&lt;/p&gt;
-&lt;figure&gt;&lt;img src=&#34;https://abram.id/images/f1-austria-neutral-lap.png&#34;
+&lt;figure&gt;&lt;img src=&#34;https://abrampers.github.io/images/f1-austria-neutral-lap.png&#34;
          alt=&#34;Figure 2: Power generation on particular point in the lap [3]&#34; width=&#34;800&#34;/&gt;&lt;figcaption&gt;
             &lt;p&gt;Figure 2: Power generation on particular point in the lap [3]&lt;/p&gt;
         &lt;/figcaption&gt;
@@ -627,10 +627,10 @@
     
     <item>
       <title>Intercepting HTTP/2 Packets without Wireshark</title>
-      <link>https://abram.id/posts/intercepting-http-2-packets-without-wireshark/</link>
+      <link>https://abrampers.github.io/posts/intercepting-http-2-packets-without-wireshark/</link>
       <pubDate>Thu, 12 Mar 2020 23:19:00 +0700</pubDate>
       
-      <guid>https://abram.id/posts/intercepting-http-2-packets-without-wireshark/</guid>
+      <guid>https://abrampers.github.io/posts/intercepting-http-2-packets-without-wireshark/</guid>
       <description>&lt;!-- raw HTML omitted --&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;#http-2-what-is-it&#34;&gt;HTTP/2, what is it?&lt;/a&gt;&lt;/li&gt;
@@ -849,10 +849,10 @@
     
     <item>
       <title>WWDC19: Best Dub-Dub ever!</title>
-      <link>https://abram.id/posts/wwdc19-best-dub-dub-ever/</link>
+      <link>https://abrampers.github.io/posts/wwdc19-best-dub-dub-ever/</link>
       <pubDate>Mon, 24 Jun 2019 17:55:00 +0700</pubDate>
       
-      <guid>https://abram.id/posts/wwdc19-best-dub-dub-ever/</guid>
+      <guid>https://abrampers.github.io/posts/wwdc19-best-dub-dub-ever/</guid>
       <description>&lt;!-- raw HTML omitted --&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;#what-is-wwdc&#34;&gt;What is WWDC?&lt;/a&gt;&lt;/li&gt;

@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>conference on abram.id</title>
-    <link>https://abram.id/tags/conference/</link>
-    <description>abram.id (conference)</description>
+    <title>conference on abram&#39;s blog</title>
+    <link>https://abrampers.github.io/tags/conference/</link>
+    <description>abram&#39;s blog (conference)</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 24 Jun 2019 17:55:00 +0700</lastBuildDate>
     
-    <atom:link href="https://abram.id/tags/conference/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://abrampers.github.io/tags/conference/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>WWDC19: Best Dub-Dub ever!</title>
-      <link>https://abram.id/posts/wwdc19-best-dub-dub-ever/</link>
+      <link>https://abrampers.github.io/posts/wwdc19-best-dub-dub-ever/</link>
       <pubDate>Mon, 24 Jun 2019 17:55:00 +0700</pubDate>
       
-      <guid>https://abram.id/posts/wwdc19-best-dub-dub-ever/</guid>
+      <guid>https://abrampers.github.io/posts/wwdc19-best-dub-dub-ever/</guid>
       <description>&lt;!-- raw HTML omitted --&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;#what-is-wwdc&#34;&gt;What is WWDC?&lt;/a&gt;&lt;/li&gt;
