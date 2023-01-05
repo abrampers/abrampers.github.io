@@ -28,9 +28,8 @@
 &lt;!-- raw HTML omitted --&gt;
 &lt;p&gt;This year, I’m very lucky to be one of the WWDC19 Scholarship Winner from Indonesia to attend Apple’s event of the year. It’s obviously the best Dub-Dub ever since it’s my first time here! Dub-Dub 19 is an event packed with awesome things and I’m going to tell my story from the complete beginning. Here we go!&lt;/p&gt;
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/6048/1*mMUmHriJt0p8Y2Z46gBZGw.jpeg&#34;
-         alt=&#34;Figure 1: HMIF ITB @ WWDC19 (Nicho, Abram, and Faza)&#34;/&gt; &lt;figcaption&gt;
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/6048/1*mMUmHriJt0p8Y2Z46gBZGw.jpeg&#34;
+         alt=&#34;Figure 1: HMIF ITB @ WWDC19 (Nicho, Abram, and Faza)&#34;/&gt;&lt;figcaption&gt;
             &lt;p&gt;Figure 1: HMIF ITB @ WWDC19 (Nicho, Abram, and Faza)&lt;/p&gt;
         &lt;/figcaption&gt;
 &lt;/figure&gt;
@@ -54,9 +53,8 @@
 &lt;p&gt;This problem forced me to find something outstanding that works and was good enough to distinct me from other applicants. And some &lt;strong&gt;Metal&lt;/strong&gt; struck my mind. “Why don’t I try to use &lt;a href=&#34;https://developer.apple.com/metal/&#34;&gt;Metal&lt;/a&gt; just like how I used OpenGL for my Computer Graphics assignment?” And after 2 sleepless nights, I did just that.&lt;/p&gt;
 &lt;p&gt;I’ve created a simple introduction to &lt;strong&gt;Metal&lt;/strong&gt; using MetalKit named &lt;strong&gt;Metalify&lt;/strong&gt;. Here&amp;rsquo;s the &lt;a href=&#34;https://github.com/abrampers/WWDC19-Submission&#34;&gt;playground&lt;/a&gt; if you&amp;rsquo;d like to try it on your own.&lt;/p&gt;
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/2544/1*O64rdYG16VbLC7NK_cnA9g.png&#34;
-         alt=&#34;Figure 2: Scholarship email!&#34;/&gt; &lt;figcaption&gt;
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/2544/1*O64rdYG16VbLC7NK_cnA9g.png&#34;
+         alt=&#34;Figure 2: Scholarship email!&#34;/&gt;&lt;figcaption&gt;
             &lt;p&gt;Figure 2: Scholarship email!&lt;/p&gt;
         &lt;/figcaption&gt;
 &lt;/figure&gt;
@@ -67,9 +65,8 @@
 &lt;h3 id=&#34;swag&#34;&gt;Swag&lt;/h3&gt;
 &lt;p&gt;Fast forward to the Dub Dub week, we got to check in at the convention center and received some Dub Dub Swag for us to wear for the rest of the week. We got a reversible bomber jacket, a Scholarship Winner T-Shirt, and a few random pins including Indonesian Flag’s pin.&lt;/p&gt;
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/6048/1*7sfvKXgFy2aoxf9QTMHpKQ.jpeg&#34;
-         alt=&#34;Figure 3: Bomber jacket &amp;#43; small Tim Cook pin&#34;/&gt; &lt;figcaption&gt;
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/6048/1*7sfvKXgFy2aoxf9QTMHpKQ.jpeg&#34;
+         alt=&#34;Figure 3: Bomber jacket &amp;#43; small Tim Cook pin&#34;/&gt;&lt;figcaption&gt;
             &lt;p&gt;Figure 3: Bomber jacket + small Tim Cook pin&lt;/p&gt;
         &lt;/figcaption&gt;
 &lt;/figure&gt;
@@ -77,14 +74,12 @@
 &lt;h3 id=&#34;scholarship-kickoff&#34;&gt;Scholarship kickoff&lt;/h3&gt;
 &lt;p&gt;After checking in, all the scholarship winner were scheduled to attend scholarship kickoff where Esther Hare &lt;a href=&#34;https://twitter.com/eehare?lang=en&#34;&gt;@EEhare&lt;/a&gt; was there to give a little talk. She encouraged us to talk to as many people as we can, whether it’s fellow scholars, developers, or even Apple engineers. And the coolest thing here is that there were plenty of Apple engineers standing by for us to talk to. I was very excited since I never had any chance to get to meet, better yet, talk to the engineers that build Apple. Besides, there were plenty of food trucks and drinks all over the place..&lt;/p&gt;
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/12000/1*Vu7eITgS5sivMkDNtPuOPw.jpeg&#34;/&gt; 
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/12000/1*Vu7eITgS5sivMkDNtPuOPw.jpeg&#34;/&gt;
 &lt;/figure&gt;
 
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/2250/1*ogZQRMEFWxEP8y9bQvQ2jw.jpeg&#34;
-         alt=&#34;Figure 4: Beautiful weather @ Discovery Meadow with Indonesian scholarship winners&#34;/&gt; &lt;figcaption&gt;
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/2250/1*ogZQRMEFWxEP8y9bQvQ2jw.jpeg&#34;
+         alt=&#34;Figure 4: Beautiful weather @ Discovery Meadow with Indonesian scholarship winners&#34;/&gt;&lt;figcaption&gt;
             &lt;p&gt;Figure 4: Beautiful weather @ Discovery Meadow with Indonesian scholarship winners&lt;/p&gt;
         &lt;/figcaption&gt;
 &lt;/figure&gt;
@@ -98,8 +93,7 @@
 &lt;h3 id=&#34;keynote&#34;&gt;Keynote&lt;/h3&gt;
 &lt;p&gt;The long awaited keynote was there and many people called this ‘the most packed WWDC Keynote ever’. This includes the announcement of the brand new Mac Pro, iPad OS, iOS 13, macOS Catalina and the SwiftUI &amp;amp; Combine which were the star for the rest of the week.&lt;/p&gt;
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/3264/1*7IDRGBs7cyfjNYCb4eQ9Sg.jpeg&#34;/&gt; 
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/3264/1*7IDRGBs7cyfjNYCb4eQ9Sg.jpeg&#34;/&gt;
 &lt;/figure&gt;
 
 &lt;p&gt;The most exciting part of the Keynote was the announcement of SwiftUI. There, Craig Federighi showed how &lt;a href=&#34;https://developer.apple.com/documentation/swiftui&#34;&gt;SwiftUI&lt;/a&gt;, with its declarative traits + &lt;a href=&#34;https://developer.apple.com/documentation/combine&#34;&gt;Combine&lt;/a&gt; (Apple’s framework for Async programming) made multi-platform development seems so easy and fluid.&lt;/p&gt;
@@ -107,18 +101,16 @@
 &lt;h3 id=&#34;scholarship-lounge&#34;&gt;Scholarship Lounge&lt;/h3&gt;
 &lt;p&gt;Scholars were given the privilege to chill and have a chit chat with fellow scholars throughout the week at the scholarship lounge. Here, we were given a wired 10MBps connection to try all the Betas they announced.&lt;/p&gt;
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/11228/1*HgGxRO1iodwpL36HH254nA.jpeg&#34;
-         alt=&#34;Figure 5: Scholarship lounge: Our home&#34;/&gt; &lt;figcaption&gt;
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/11228/1*HgGxRO1iodwpL36HH254nA.jpeg&#34;
+         alt=&#34;Figure 5: Scholarship lounge: Our home&#34;/&gt;&lt;figcaption&gt;
             &lt;p&gt;Figure 5: Scholarship lounge: Our home&lt;/p&gt;
         &lt;/figcaption&gt;
 &lt;/figure&gt;
 
 &lt;h3 id=&#34;pro-studio&#34;&gt;Pro studio&lt;/h3&gt;
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*kmCk6hBke2b9lhluc6R04g.jpeg&#34;
-         alt=&#34;Figure 6: The recently announced Mac Pro&#34;/&gt; &lt;figcaption&gt;
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*kmCk6hBke2b9lhluc6R04g.jpeg&#34;
+         alt=&#34;Figure 6: The recently announced Mac Pro&#34;/&gt;&lt;figcaption&gt;
             &lt;p&gt;Figure 6: The recently announced Mac Pro&lt;/p&gt;
         &lt;/figcaption&gt;
 &lt;/figure&gt;
@@ -127,18 +119,15 @@
 &lt;h3 id=&#34;sessions-and-labs&#34;&gt;Sessions and Labs&lt;/h3&gt;
 &lt;p&gt;For the rest of the week, there were plenty of sessions and labs conducted all over the Convention Center. Sessions are more like seminars conducted by Apple where they showcase best practices, reveal new features in more detail, and give a bit of demo. Labs are the place to go if you have a bug, question, or a feature request and give it right to the engineers that work on that particular feature. Awesome! We could actually ask the person who was in charge of the product. What a way to solve a bug.&lt;/p&gt;
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*ZsvETrvysoT60qinnSB5yw.jpeg&#34;/&gt; 
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*ZsvETrvysoT60qinnSB5yw.jpeg&#34;/&gt;
 &lt;/figure&gt;
 
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*G0I23P7UxXG8_cbAa94LIA.jpeg&#34;/&gt; 
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*G0I23P7UxXG8_cbAa94LIA.jpeg&#34;/&gt;
 &lt;/figure&gt;
 
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/2000/1*lT-EgnL2S5TZziXPU5-j9w.jpeg&#34;/&gt; 
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/2000/1*lT-EgnL2S5TZziXPU5-j9w.jpeg&#34;/&gt;
 &lt;/figure&gt;
 
 &lt;h3 id=&#34;games-sporting-events-and-wwdc-bash&#34;&gt;Games, Sporting Events, and WWDC Bash!&lt;/h3&gt;
@@ -146,19 +135,16 @@
 &lt;p&gt;Throughout the week they conducted an AR game called SwiftStrike. It is a bowling game where the player had to hit down the opponent’s pin. At the end of the week, they conducted the SwiftStrike Championship and the funny thing is both the winner and the runner up are Indonesian 🇮🇩.&lt;/p&gt;
 &lt;p&gt;On the last night, Apple also invited the Weezers to the WWDC Bash (some kind of get-together concert) where we can chill out, enjoy the concert, and play games!&lt;/p&gt;
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/2250/1*AiXv107iWKkFjHNFwlXAFQ.jpeg&#34;/&gt; 
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/2250/1*AiXv107iWKkFjHNFwlXAFQ.jpeg&#34;/&gt;
 &lt;/figure&gt;
 
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/2250/1*a3GP1NeLhRs4ZSV0wcYW9Q.jpeg&#34;/&gt; 
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/2250/1*a3GP1NeLhRs4ZSV0wcYW9Q.jpeg&#34;/&gt;
 &lt;/figure&gt;
 
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/2000/1*-YJKq5HbYbGyURfclQbyBw.jpeg&#34;
-         alt=&#34;Figure 7: HIIT Morning Workout, SwiftStrike, and WWDC19 Bash!&#34;/&gt; &lt;figcaption&gt;
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/2000/1*-YJKq5HbYbGyURfclQbyBw.jpeg&#34;
+         alt=&#34;Figure 7: HIIT Morning Workout, SwiftStrike, and WWDC19 Bash!&#34;/&gt;&lt;figcaption&gt;
             &lt;p&gt;Figure 7: HIIT Morning Workout, SwiftStrike, and WWDC19 Bash!&lt;/p&gt;
         &lt;/figcaption&gt;
 &lt;/figure&gt;
@@ -173,24 +159,20 @@
 &lt;p&gt;&lt;strong&gt;Pro tip&lt;/strong&gt;: Bring your business card and talk to as many people as you can @ WWDC&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*d2QcqQotYDs202ALyQAdqg.jpeg&#34;/&gt; 
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*d2QcqQotYDs202ALyQAdqg.jpeg&#34;/&gt;
 &lt;/figure&gt;
 
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*vX4kZveZpYSZ4W9krHvhFw.jpeg&#34;/&gt; 
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*vX4kZveZpYSZ4W9krHvhFw.jpeg&#34;/&gt;
 &lt;/figure&gt;
 
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*jr4w2Xikvy-La1rBAEWq2g.jpeg&#34;/&gt; 
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*jr4w2Xikvy-La1rBAEWq2g.jpeg&#34;/&gt;
 &lt;/figure&gt;
 
 &lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
-&lt;figure&gt;
-    &lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*Jo4PpChs5Mev8yYoKoAQng.jpeg&#34;
-         alt=&#34;Figure 8: Don&amp;amp;rsquo;t be shy and make new friends @ WWDC&#34;/&gt; &lt;figcaption&gt;
+&lt;figure&gt;&lt;img src=&#34;https://cdn-images-1.medium.com/max/8064/1*Jo4PpChs5Mev8yYoKoAQng.jpeg&#34;
+         alt=&#34;Figure 8: Don&amp;amp;rsquo;t be shy and make new friends @ WWDC&#34;/&gt;&lt;figcaption&gt;
             &lt;p&gt;Figure 8: Don&amp;rsquo;t be shy and make new friends @ WWDC&lt;/p&gt;
         &lt;/figcaption&gt;
 &lt;/figure&gt;
