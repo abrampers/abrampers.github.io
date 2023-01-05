@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+
+<html lang="en-us" data-theme="">
+<head>
+    
+        
+<meta charset="utf-8">
+<meta name="HandheldFriendly" content="True">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer-when-downgrade">
+
+<title>About - abram&#39;s blog</title>
+<meta name="description" content="">
+
+<link rel="icon" type="image/x-icon" href="https://abrampers.github.io/favicon.ico">
+<link rel="apple-touch-icon-precomposed" href="https://abrampers.github.io/favicon.png">
+
+
+
+    
+
+
+
+
+
+    
+    
+    
+
+    
+        <link rel="stylesheet" href="https://abrampers.github.io/css/style.bf67952500c522fa4be2b487513979e2a6f82a03826f34db9e4592670b2a1c3b.css" integrity="sha256-v2eVJQDFIvpL4rSHUTl54qb4KgOCbzTbnkWSZwsqHDs=">
+    
+
+
+
+
+
+    
+
+
+
+
+
+    
+    
+    
+
+    
+        <link rel="stylesheet" href="https://abrampers.github.io/css/style.b9b83862c8dccf2c4b1642c9fba82e8360729a7f4bc26116d01745dcc3bb8b82.css" integrity="sha256-ubg4YsjczyxLFkLJ&#43;6gug2Bymn9LwmEW0BdF3MO7i4I=">
+    
+
+
+
+
+
+<meta property="og:title" content="About" />
+<meta property="og:description" content="Hi my name is Abram. I promise I&rsquo;ll work ono this page soon." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://abrampers.github.io/about/" /><meta property="article:section" content="" />
+<meta property="article:published_time" content="2023-01-05T11:18:00+07:00" />
+<meta property="article:modified_time" content="2023-01-05T11:18:00+07:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="About"/>
+<meta name="twitter:description" content="Hi my name is Abram. I promise I&rsquo;ll work ono this page soon."/>
+
+
+
+
+
+
+
+
+
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to main content</a>
+    <div class="container">
+        <header class="common-header"> 
+            
+                <h1 class="site-title">
+    <a href="/">abram&#39;s blog</a>
+</h1>
+
+    <nav>
+        
+        
+        <a class="" href="https://abrampers.github.io/about/" title="About">About</a>
+        
+        <a class="" href="https://abrampers.github.io/tags/" title="Tags">Tags</a>
+        
+        <a class="" href="https://abrampers.github.io/posts/" title="Archive">Archive</a>
+        
+    </nav>
+
+
+            
+        </header>
+        <main id="main" tabindex="-1"> 
+            
+    
+    
+    <article class="post">
+        <header class="post-header">
+            <h1 class="post-title">About</h1>
+        </header>
+        <div class="content">
+            <p>Hi my name is Abram. I promise I&rsquo;ll work ono this page soon.</p>
+
+        </div>
+        
+
+
+<div class="post-info">
+    
+        <div class="post-date">2023-01-05</div>
+    
+    <div class="post-taxonomies">
+        
+            
+    </div>
+</div>
+
+    </article>
+
+    
+
+    
+
+
+        </main>
+        
+            <footer class="common-footer">
+    
+    
+
+    <div class="common-footer-bottom">
+        
+        <div class="copyright">
+            <p>© 2023<br>
+            Powered by <a target="_blank" rel="noopener noreferrer" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" rel="noopener noreferrer" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.
+            </p>  
+        </div> 
+
+        
+
+    
+
+
+
+    <button class="theme-switcher">
+        Dark theme
+    </button>
+
+    <script>
+    const STORAGE_KEY = 'user-color-scheme'
+    const defaultTheme = "auto"
+
+    let currentTheme
+    let switchButton
+    let autoDefinedScheme = window.matchMedia('(prefers-color-scheme: dark)')
+
+    const autoChangeScheme = e => {
+        currentTheme = e.matches ? 'dark' : 'light'
+        document.documentElement.setAttribute('data-theme', currentTheme)
+        changeButtonText()
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        switchButton = document.querySelector('.theme-switcher')
+        currentTheme = detectCurrentScheme()
+        if (currentTheme == 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark')
+        }
+        if (currentTheme == 'auto') {
+            autoChangeScheme(autoDefinedScheme);
+            autoDefinedScheme.addListener(autoChangeScheme);
+        }
+        changeButtonText()
+        switchButton.addEventListener('click', switchTheme, false)
+    })
+
+    function detectCurrentScheme() {
+        if (localStorage.getItem(STORAGE_KEY)) {
+            return localStorage.getItem(STORAGE_KEY)
+        } 
+        if (defaultTheme) {
+            return defaultTheme
+        } 
+        if (!window.matchMedia) {
+            return 'light'
+        } 
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark'
+        }
+        return 'light'
+    }
+
+    function changeButtonText()
+    {   
+        switchButton.textContent = currentTheme == 'dark' ?  "Light theme" : "Dark theme"
+    }
+
+    function switchTheme(e) {
+        if (currentTheme == 'dark') {
+            localStorage.setItem(STORAGE_KEY, 'light')
+            document.documentElement.setAttribute('data-theme', 'light')
+            currentTheme = 'light'
+        } else {
+            localStorage.setItem(STORAGE_KEY, 'dark')
+            document.documentElement.setAttribute('data-theme', 'dark')
+            currentTheme = 'dark'
+        }
+        changeButtonText()
+    }
+    </script>
+   
+    </div>
+</footer>
+
+        
+    </div>
+</body>
+</html>
